@@ -111,54 +111,7 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
         </div>
       )}
 
-      {/* Entropy Plotly chart */}
-      {!loading && hist && !hist.error && hist.entropy.length > 1 && (
-        <div style={{ background: "var(--surface)", border: "1px solid var(--border)", overflow: "hidden" }}>
-          <div style={{ padding: "10px 20px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: "9px", letterSpacing: "0.2em", color: "var(--muted)", textTransform: "uppercase" }}>entropy history · green = clean · red = elevated</span>
-            <span style={{ fontSize: "9px", color: ec }}>{e.status} · {e.rho.toFixed(3)}× threshold</span>
-          </div>
-          <Plot
-            data={[
-              {
-                type: "scatter" as const,
-                x: hist.entropy.map((_: number, i: number) => i),
-                y: hist.threshold,
-                mode: "lines" as const,
-                line: { color: "rgba(232,184,75,0.4)", width: 1, dash: "dot" as const },
-                name: "threshold",
-                hoverinfo: "skip" as const,
-                fill: "tonexty" as const,
-                fillcolor: "rgba(232,184,75,0.03)",
-              },
-              {
-                type: "scatter" as const,
-                x: hist.entropy.map((_: number, i: number) => i),
-                y: hist.entropy,
-                mode: "lines" as const,
-                line: { color: "rgba(0,200,150,0.8)", width: 1.5 },
-                name: "entropy",
-                hovertemplate: "entropy: %{y:.5f}<extra></extra>",
-              },
-            ]}
-            layout={{
-              paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "#08080f",
-              margin: { l: 50, r: 20, t: 8, b: 30 },
-              xaxis: { visible: false, gridcolor: "#1e1e2e" },
-              yaxis: { tickfont: { family: "JetBrains Mono", size: 8, color: "#44445a" }, gridcolor: "#1e1e2e", zeroline: false },
-              legend: { font: { family: "JetBrains Mono", size: 9, color: "#44445a" }, bgcolor: "transparent", x: 0.01, y: 0.99 },
-              shapes: [{
-                type: "line", x0: hist.entropy.length - 1, x1: hist.entropy.length - 1,
-                y0: 0, y1: hist.entropy[hist.entropy.length - 1],
-                line: { color: e.status === "CRITICAL" ? "rgba(255,68,102,0.6)" : e.status === "ELEVATED" ? "rgba(232,184,75,0.6)" : "rgba(0,200,150,0.6)", width: 1, dash: "dot" }
-              }]
-            } as any}
-            config={{ displayModeBar: false, responsive: true }}
-            style={{ width: "100%", height: "120px" }}
-            useResizeHandler
-          />
-        </div>
-      )}
+
 
       {/* Entropy */}
       <div style={{ background: "var(--surface)", border: "1px solid var(--border)", display: "grid", gridTemplateColumns: "1fr 1fr" }}>

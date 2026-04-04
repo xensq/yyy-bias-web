@@ -82,7 +82,7 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState<TabId>("bias")
-  const [theme, setTheme] = useState("default")
+  const [theme, setTheme] = useState("crimson")
   const [collapsed, setCollapsed] = useState(false)
   const router = useRouter()
 

@@ -162,7 +162,7 @@ export default function DealerDeltaTab() {
           {data.strike_data.length > 0 && (
             <div className="glass" style={{ padding: "16px" }}>
               <p style={{ fontSize: "9px", letterSpacing: "0.2em", color: "var(--dim)", textTransform: "uppercase", marginBottom: "12px" }}>net dealer delta by strike</p>
-              <div style={{ display: "flex", flexDirection: "column", gap: "2px", position: "relative" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "1px", position: "relative", maxHeight: "320px", overflowY: "auto" }}>
                 {[...data.strike_data].sort((a, b) => b.strike - a.strike).map(row => {
                   const max = Math.max(...data.strike_data.map(r => Math.abs(r.net_delta))) || 1
                   const pct = Math.abs(row.net_delta) / max * 100
@@ -178,7 +178,7 @@ export default function DealerDeltaTab() {
                       <span style={{ fontSize: "9px", fontFamily: "JetBrains Mono, monospace", color: isNear ? "var(--text)" : isHovered ? "var(--dim)" : "var(--muted)", width: "48px", textAlign: "right" }}>
                         {row.strike.toLocaleString()}
                       </span>
-                      <div style={{ flex: 1, height: "8px", background: "rgba(255,255,255,0.02)", borderRadius: "2px", overflow: "hidden", position: "relative" }}>
+                      <div style={{ flex: 1, height: "6px", background: "rgba(255,255,255,0.02)", borderRadius: "2px", overflow: "hidden", position: "relative" }}>
                         <div style={{ position: "absolute", top: 0, bottom: 0, width: "1px", left: "50%", background: "var(--border)" }} />
                         <div style={{
                           position: "absolute", top: 0, bottom: 0, borderRadius: "2px",
