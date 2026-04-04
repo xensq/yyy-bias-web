@@ -1,36 +1,89 @@
 "use client"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { fetchBias, BiasData } from "@/lib/api"
 import BiasTab from "@/components/tabs/BiasTab"
 import TopologyTab from "@/components/tabs/TopologyTab"
 import GexTab from "@/components/tabs/GexTab"
 import NetIVTab from "@/components/tabs/NetIVTab"
-import ZeroDTETab from "@/components/tabs/ZeroDTETab"
+import IVSurfaceTab from "@/components/tabs/IVSurfaceTab"
+import MacroTab from "@/components/tabs/MacroTab"
 import ProbabilityTab from "@/components/tabs/ProbabilityTab"
 import DealerDeltaTab from "@/components/tabs/DealerDeltaTab"
 import FlowTab from "@/components/tabs/FlowTab"
-import IVSurfaceTab from "@/components/tabs/IVSurfaceTab"
-import MacroTab from "@/components/tabs/MacroTab"
 import { useRouter } from "next/navigation"
 
-const TABS = ["bias", "topology", "gex", "net iv", "iv surface", "probability", "delta", "flow", "macro"] as const
-type Tab = typeof TABS[number]
+const TABS = [
+  { id: "bias",        label: "Bias",        icon: "◈" },
+  { id: "topology",   label: "Topology",    icon: "⬡" },
+  { id: "gex",        label: "GEX",         icon: "Γ" },
+  { id: "net iv",     label: "Net IV",      icon: "σ" },
+  { id: "iv surface", label: "IV Surface",  icon: "∿" },
+  { id: "probability",label: "Probability", icon: "∫" },
+  { id: "delta",      label: "Delta",       icon: "Δ" },
+  { id: "flow",       label: "Flow",        icon: "θ" },
+  { id: "macro",      label: "Macro",       icon: "Σ" },
+] as const
+type TabId = typeof TABS[number]["id"]
 
 const THEMES = [
   { id: "default", label: "default" },
   { id: "crimson", label: "crimson" },
-  { id: "gold", label: "gold" },
-  { id: "blue", label: "blue" },
-  { id: "silver", label: "silver" },
+  { id: "gold",    label: "gold" },
+  { id: "blue",    label: "blue" },
+  { id: "silver",  label: "silver" },
 ]
+
+function GreekBackground() {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const rafRef = useRef<number>(0)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext("2d")!
+    const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight }
+    resize()
+    window.addEventListener("resize", resize)
+
+    const symbols = ["Δ", "Γ", "Σ", "θ", "σ", "ρ", "λ", "μ", "α", "β", "π", "φ"]
+    const particles = Array.from({ length: 35 }, () => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      symbol: symbols[Math.floor(Math.random() * symbols.length)],
+      speed: Math.random() * 0.3 + 0.08,
+      opacity: Math.random() * 0.06 + 0.02,
+      size: Math.random() * 10 + 8,
+      drift: (Math.random() - 0.5) * 0.15,
+    }))
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      particles.forEach(p => {
+        p.y -= p.speed
+        p.x += p.drift
+        if (p.y < -20) { p.y = canvas.height + 20; p.x = Math.random() * canvas.width }
+        if (p.x < -20) p.x = canvas.width + 20
+        if (p.x > canvas.width + 20) p.x = -20
+        ctx.font = `${p.size}px JetBrains Mono, monospace`
+        ctx.fillStyle = `rgba(0,200,150,${p.opacity})`
+        ctx.fillText(p.symbol, p.x, p.y)
+      })
+      rafRef.current = requestAnimationFrame(draw)
+    }
+    draw()
+    return () => { cancelAnimationFrame(rafRef.current); window.removeEventListener("resize", resize) }
+  }, [])
+
+  return <canvas ref={canvasRef} style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0 }} />
+}
 
 export default function Dashboard() {
   const [data, setData] = useState<BiasData | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const [tab, setTab] = useState<Tab>("bias")
+  const [tab, setTab] = useState<TabId>("bias")
   const [theme, setTheme] = useState("default")
-  const [showThemes, setShowThemes] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -51,84 +104,110 @@ export default function Dashboard() {
     timeZoneName: "short",
   })
 
+  const sideW = collapsed ? 56 : 180
+
   return (
-    <main className="min-h-screen" style={{ background: "var(--bg)" }}>
-      <div style={{ borderBottom: "0.5px solid var(--border)", position: "sticky", top: 0, background: "var(--bg)", zIndex: 10 }}>
-        <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 24px" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: "48px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>
-              <button onClick={() => router.push("/")}
-                style={{ fontSize: "12px", fontWeight: 500, letterSpacing: "0.15em", color: "var(--accent)", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}>
-                yyy
+    <div style={{ display: "flex", minHeight: "100vh", background: "var(--bg)", position: "relative" }}>
+      <GreekBackground />
+
+      {/* Sidebar */}
+      <div style={{
+        position: "fixed", left: 0, top: 0, bottom: 0, width: `${sideW}px`,
+        background: "var(--surface)", borderRight: "1px solid var(--border)",
+        display: "flex", flexDirection: "column", zIndex: 20,
+        transition: "width 0.2s ease",
+      }}>
+        {/* Logo */}
+        <div style={{ padding: collapsed ? "18px 0" : "18px 20px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: collapsed ? "center" : "space-between" }}>
+          {!collapsed && (
+            <button onClick={() => router.push("/")}
+              style={{ fontSize: "14px", fontWeight: 700, letterSpacing: "0.3em", color: "var(--accent)", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}>
+              YYY
+            </button>
+          )}
+          <button onClick={() => setCollapsed(!collapsed)}
+            style={{ background: "none", border: "none", cursor: "pointer", color: "var(--muted)", fontSize: "14px", padding: "0", fontFamily: "inherit", lineHeight: 1 }}>
+            {collapsed ? "›" : "‹"}
+          </button>
+        </div>
+
+        {/* Nav */}
+        <nav style={{ flex: 1, padding: "8px 0", overflowY: "auto" }}>
+          {TABS.map(t => {
+            const active = tab === t.id
+            return (
+              <button key={t.id} onClick={() => setTab(t.id)}
+                style={{
+                  display: "flex", alignItems: "center", gap: "12px",
+                  width: "100%", padding: collapsed ? "11px 0" : "11px 20px",
+                  justifyContent: collapsed ? "center" : "flex-start",
+                  background: active ? "var(--accent-dim)" : "transparent",
+                  borderLeft: active ? "2px solid var(--accent)" : "2px solid transparent",
+                  border: "none", borderLeft: active ? "2px solid var(--accent)" : "2px solid transparent",
+                  color: active ? "var(--accent)" : "var(--muted)",
+                  cursor: "pointer", fontFamily: "inherit", transition: "all 0.1s",
+                  fontSize: "13px",
+                }}>
+                <span style={{ fontSize: "16px", width: "20px", textAlign: "center", flexShrink: 0 }}>{t.icon}</span>
+                {!collapsed && <span style={{ fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase" }}>{t.label}</span>}
               </button>
-              <nav style={{ display: "flex", gap: "2px" }}>
-                {TABS.map(t => (
-                  <button key={t} onClick={() => setTab(t)}
-                    style={{
-                      padding: "12px 10px", fontSize: "10px", letterSpacing: "0.08em",
-                      textTransform: "uppercase", background: "none", border: "none",
-                      borderBottom: tab === t ? "1px solid var(--text)" : "1px solid transparent",
-                      color: tab === t ? "var(--text)" : "#3a3a3a",
-                      cursor: "pointer", fontFamily: "inherit", transition: "color 0.15s",
-                    }}>
-                    {t}
-                  </button>
-                ))}
-              </nav>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-              <p style={{ fontSize: "10px", color: "var(--muted)" }}>{now}</p>
-              <div style={{ position: "relative" }}>
-                <button onClick={() => setShowThemes(!showThemes)}
-                  style={{ fontSize: "10px", letterSpacing: "0.1em", color: "var(--muted)", background: "none", border: "0.5px solid #1f1f1f", padding: "4px 10px", cursor: "pointer", fontFamily: "inherit", textTransform: "uppercase" }}>
-                  theme
-                </button>
-                {showThemes && (
-                  <div style={{ position: "absolute", right: 0, top: "calc(100% + 8px)", background: "var(--border)", border: "0.5px solid #1f1f1f", minWidth: "120px", zIndex: 50 }}>
-                    {THEMES.map(th => (
-                      <button key={th.id} onClick={() => { setTheme(th.id); setShowThemes(false) }}
-                        style={{ display: "block", width: "100%", textAlign: "left", padding: "8px 14px", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", background: theme === th.id ? "rgba(255,255,255,0.03)" : "none", color: theme === th.id ? "var(--accent)" : "var(--dim)", border: "none", cursor: "pointer", fontFamily: "inherit" }}>
-                        {th.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+            )
+          })}
+        </nav>
+
+        {/* Bottom — theme + time */}
+        <div style={{ borderTop: "1px solid var(--border)", padding: collapsed ? "12px 0" : "12px 16px" }}>
+          {!collapsed && <p style={{ fontSize: "8px", color: "var(--muted)", marginBottom: "8px", letterSpacing: "0.1em" }}>{now}</p>}
+          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            {!collapsed && THEMES.map(th => (
+              <button key={th.id} onClick={() => setTheme(th.id)}
+                style={{ display: "flex", alignItems: "center", gap: "8px", background: "none", border: "none", cursor: "pointer", padding: "3px 0", fontFamily: "inherit" }}>
+                <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: theme === th.id ? "var(--accent)" : "var(--border)" }} />
+                <span style={{ fontSize: "9px", color: theme === th.id ? "var(--accent)" : "var(--muted)", letterSpacing: "0.1em", textTransform: "uppercase" }}>{th.label}</span>
+              </button>
+            ))}
+            {collapsed && (
+              <button onClick={() => setCollapsed(false)}
+                style={{ background: "none", border: "none", cursor: "pointer", color: "var(--muted)", fontSize: "14px", padding: "4px 0", width: "100%", fontFamily: "inherit" }}>
+                ◐
+              </button>
+            )}
           </div>
         </div>
       </div>
 
-      <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "24px 32px" }}>
-        {loading && (
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "var(--dim)", fontSize: "12px", marginTop: "48px" }}>
-            <div style={{ width: "6px", height: "6px", background: "var(--accent)", borderRadius: "50%" }} />
-            pulling live data...
-          </div>
-        )}
-        {error && (
-          <div style={{ border: "0.5px solid rgba(255,85,85,0.3)", background: "rgba(255,85,85,0.05)", borderRadius: "8px", padding: "16px", color: "#ff5555", fontSize: "12px", marginTop: "16px" }}>
-            {error}
-          </div>
-        )}
+      {/* Main content */}
+      <div style={{ marginLeft: `${sideW}px`, flex: 1, minWidth: 0, position: "relative", zIndex: 1, transition: "margin-left 0.2s ease" }}>
+        <div style={{ maxWidth: "1300px", margin: "0 auto", padding: "32px" }}>
+          {loading && (
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--muted)", fontSize: "11px", padding: "48px 0" }}>
+              <div style={{ width: "4px", height: "4px", background: "var(--accent)", borderRadius: "50%", animation: "pulse 1.5s infinite" }} />
+              pulling live data...
+            </div>
+          )}
+          {error && (
+            <div style={{ border: "1px solid rgba(255,68,102,0.3)", background: "rgba(255,68,102,0.04)", padding: "16px", color: "var(--bear)", fontSize: "12px", marginTop: "16px" }}>
+              {error}
+            </div>
+          )}
 
-        {/* IV Surface doesn't need bias data */}
-        {tab === "iv surface" && <IVSurfaceTab />}
-        {tab === "probability" && <ProbabilityTab />}
-        {tab === "delta" && <DealerDeltaTab />}
-        {tab === "flow" && <FlowTab />}
+          {tab === "iv surface" && <IVSurfaceTab />}
+          {tab === "probability" && <ProbabilityTab />}
+          {tab === "delta" && <DealerDeltaTab />}
+          {tab === "flow" && <FlowTab />}
+          {tab === "net iv" && <NetIVTab />}
 
-        {data && !loading && (
-          <>
-            {tab === "bias"      && <BiasTab bias={data.bias} />}
-            {tab === "topology"  && <TopologyTab topology={data.topology} entropy={data.entropy} />}
-            {tab === "gex"       && <GexTab gex={data.gex} />}
-            {tab === "net iv"    && <NetIVTab />}
-            {tab === "macro"     && <MacroTab macro={data.macro} />}
-          </>
-        )}
-        <p style={{ textAlign: "center", color: "var(--muted)", fontSize: "11px", marginTop: "48px", letterSpacing: "0.1em" }}>not financial advice</p>
+          {data && !loading && (
+            <>
+              {tab === "bias"      && <BiasTab bias={data.bias} />}
+              {tab === "topology"  && <TopologyTab topology={data.topology} entropy={data.entropy} />}
+              {tab === "gex"       && <GexTab gex={data.gex} />}
+              {tab === "macro"     && <MacroTab macro={data.macro} />}
+            </>
+          )}
+          <p style={{ textAlign: "center", color: "var(--muted)", fontSize: "9px", marginTop: "48px", letterSpacing: "0.2em", opacity: 0.4 }}>NOT FINANCIAL ADVICE</p>
+        </div>
       </div>
-    </main>
+    </div>
   )
 }
