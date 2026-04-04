@@ -48,7 +48,7 @@ export default function Landing() {
       y: Math.random() * window.innerHeight,
       symbol: symbols[Math.floor(Math.random() * symbols.length)],
       speed: Math.random() * 0.4 + 0.1,
-      opacity: Math.random() * 0.08 + 0.02,
+      opacity: Math.random() * 0.18 + 0.06,
       size: Math.random() * 12 + 8,
       drift: (Math.random() - 0.5) * 0.2,
     }))
