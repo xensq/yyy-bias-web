@@ -96,7 +96,7 @@ export default function FlowTab() {
 
           {/* IV Skew curve */}
           {data.skew_data.length > 0 && (() => {
-            const exps = [...new Set(data.skew_data.map(d => d.expiry))].sort()
+            const exps = Array.from(new Set(data.skew_data.map(d => d.expiry))).sort()
             const colors = ["rgba(0,200,150,0.8)", "rgba(240,192,64,0.7)", "rgba(255,130,100,0.6)"]
             return (
               <div className="glass" style={{ padding: 0, overflow: "hidden" }}>
