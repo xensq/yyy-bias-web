@@ -2,28 +2,10 @@
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 
-const PHI = (1 + Math.sqrt(5)) / 2
-const RAW_VERTS: [number,number,number][] = [
-  [0,1,PHI],[0,-1,PHI],[0,1,-PHI],[0,-1,-PHI],
-  [1,PHI,0],[-1,PHI,0],[1,-PHI,0],[-1,-PHI,0],
-  [PHI,0,1],[-PHI,0,1],[PHI,0,-1],[-PHI,0,-1]
-]
-const NORM_VERTS = RAW_VERTS.map(v => { const l = Math.sqrt(v[0]**2+v[1]**2+v[2]**2); return [v[0]/l,v[1]/l,v[2]/l] as [number,number,number] })
-const EDGES: [number,number][] = [
-  [0,1],[0,4],[0,5],[0,8],[0,9],[1,6],[1,7],[1,8],[1,9],
-  [2,3],[2,4],[2,5],[2,10],[2,11],[3,6],[3,7],[3,10],[3,11],
-  [4,5],[4,8],[4,10],[5,9],[5,11],[6,7],[6,8],[6,10],[7,9],[7,11],[8,10],[9,11]
-]
-
-function rotX(v:[number,number,number], a:number):[number,number,number] { const c=Math.cos(a),s=Math.sin(a); return [v[0],v[1]*c-v[2]*s,v[1]*s+v[2]*c] }
-function rotY(v:[number,number,number], a:number):[number,number,number] { const c=Math.cos(a),s=Math.sin(a); return [v[0]*c+v[2]*s,v[1],-v[0]*s+v[2]*c] }
-function project(v:[number,number,number], cx:number, cy:number, size:number):[number,number,number] { const z=v[2]+3.5; const f=size*2.2; return [cx+v[0]/z*f, cy+v[1]/z*f, z] }
-
 export default function Landing() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const router = useRouter()
   const [hovered, setHovered] = useState(false)
-  const angleRef = useRef({ x: 0.3, y: 0 })
   const rafRef = useRef<number>(0)
 
   useEffect(() => {
@@ -35,73 +17,63 @@ export default function Landing() {
     resize()
     window.addEventListener("resize", resize)
 
-    // Star particles
-    const particles = Array.from({ length: 180 }, () => ({
-      x: Math.random() * window.innerWidth,
-      y: Math.random() * window.innerHeight,
-      r: Math.random() * 1.2 + 0.2,
-      speed: Math.random() * 0.15 + 0.05,
-      opacity: Math.random() * 0.4 + 0.1,
-    }))
+    let t = 0
 
     const draw = () => {
       const W = canvas.width, H = canvas.height
       ctx.clearRect(0, 0, W, H)
 
-      // Particles
-      particles.forEach(p => {
-        p.y -= p.speed
-        if (p.y < -2) { p.y = H + 2; p.x = Math.random() * W }
+      // Animated grid
+      const COLS = Math.ceil(W / 80) + 1
+      const ROWS = Math.ceil(H / 80) + 1
+      const offsetX = (t * 0.3) % 80
+      const offsetY = (t * 0.15) % 80
+
+      for (let i = 0; i < COLS; i++) {
+        const x = i * 80 - offsetX
+        const alpha = 0.03 + 0.015 * Math.sin(t * 0.01 + i * 0.3)
         ctx.beginPath()
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI*2)
-        ctx.fillStyle = `rgba(255,255,255,${p.opacity})`
-        ctx.fill()
-      })
-
-      // Polyhedron — centered slightly right on wide screens
-      const cx = W * 0.62, cy = H * 0.5
-      const size = Math.min(W, H) * 0.18
-      angleRef.current.x += 0.004
-      angleRef.current.y += 0.006
-
-      const verts = NORM_VERTS.map(v => {
-        let w = rotX(v as [number,number,number], angleRef.current.x)
-        w = rotY(w, angleRef.current.y)
-        return project(w, cx, cy, size)
-      })
-
-      // Draw edges with depth-based opacity
-      EDGES.forEach(([i, j]) => {
-        const a = verts[i], b = verts[j]
-        const depth = ((a[2] + b[2]) / 2 - 2.5) / 2
-        const alpha = Math.max(0.04, Math.min(0.45, depth * 0.5))
-        ctx.beginPath()
-        ctx.moveTo(a[0], a[1])
-        ctx.lineTo(b[0], b[1])
+        ctx.moveTo(x, 0)
+        ctx.lineTo(x, H)
         ctx.strokeStyle = `rgba(0,200,150,${alpha})`
-        ctx.lineWidth = 0.8
+        ctx.lineWidth = 0.5
         ctx.stroke()
-      })
+      }
 
-      // Draw vertices
-      verts.forEach(v => {
-        const depth = (v[2] - 2.5) / 2
-        const alpha = Math.max(0.05, Math.min(0.6, depth * 0.8))
+      for (let j = 0; j < ROWS; j++) {
+        const y = j * 80 - offsetY
+        const alpha = 0.03 + 0.015 * Math.sin(t * 0.008 + j * 0.4)
         ctx.beginPath()
-        ctx.arc(v[0], v[1], 1.5, 0, Math.PI*2)
-        ctx.fillStyle = `rgba(0,200,150,${alpha})`
-        ctx.fill()
-      })
+        ctx.moveTo(0, y)
+        ctx.lineTo(W, y)
+        ctx.strokeStyle = `rgba(0,200,150,${alpha})`
+        ctx.lineWidth = 0.5
+        ctx.stroke()
+      }
 
-      // Outer ring glow
-      const grad = ctx.createRadialGradient(cx, cy, size*0.8, cx, cy, size*2.2)
-      grad.addColorStop(0, "rgba(0,200,150,0.03)")
-      grad.addColorStop(1, "rgba(0,200,150,0)")
-      ctx.beginPath()
-      ctx.arc(cx, cy, size*2.2, 0, Math.PI*2)
-      ctx.fillStyle = grad
-      ctx.fill()
+      // Scanline effect — very subtle horizontal line sweeping down
+      const scanY = (t * 0.8) % H
+      const scanGrad = ctx.createLinearGradient(0, scanY - 40, 0, scanY + 40)
+      scanGrad.addColorStop(0, "rgba(0,200,150,0)")
+      scanGrad.addColorStop(0.5, "rgba(0,200,150,0.04)")
+      scanGrad.addColorStop(1, "rgba(0,200,150,0)")
+      ctx.fillStyle = scanGrad
+      ctx.fillRect(0, scanY - 40, W, 80)
 
+      // Data stream lines on the right — vertical dashes moving
+      for (let k = 0; k < 4; k++) {
+        const x = W * 0.82 + k * 18
+        const speed = 0.8 + k * 0.3
+        const yStart = ((t * speed + k * 120) % (H + 40)) - 40
+        ctx.beginPath()
+        ctx.moveTo(x, yStart)
+        ctx.lineTo(x, yStart + 20)
+        ctx.strokeStyle = `rgba(0,200,150,${0.06 + k * 0.02})`
+        ctx.lineWidth = 1
+        ctx.stroke()
+      }
+
+      t++
       rafRef.current = requestAnimationFrame(draw)
     }
     draw()
@@ -113,36 +85,65 @@ export default function Landing() {
   }, [])
 
   return (
-    <div style={{ position: "relative", width: "100vw", height: "100vh", background: "#0a0a0a", overflow: "hidden" }}>
+    <div style={{ position: "relative", width: "100vw", height: "100vh", background: "#050505", overflow: "hidden" }}>
       <canvas ref={canvasRef} style={{ position: "absolute", inset: 0 }} />
 
-      {/* content */}
-      <div style={{ position: "relative", zIndex: 10, height: "100%", display: "flex", alignItems: "center", paddingLeft: "8vw" }}>
-        <div>
-          <p style={{ fontSize: "10px", letterSpacing: "0.35em", color: "#333", marginBottom: "28px", textTransform: "uppercase", fontFamily: "JetBrains Mono, monospace" }}>
-            market intelligence terminal
-          </p>
-          <h1 style={{ fontSize: "clamp(56px, 8vw, 96px)", fontWeight: 600, color: "#e8e8e8", letterSpacing: "-0.03em", lineHeight: 1, marginBottom: "20px", fontFamily: "JetBrains Mono, monospace" }}>
-            yyy
-          </h1>
-          <p style={{ fontSize: "13px", color: "#444", marginBottom: "8px", fontFamily: "JetBrains Mono, monospace" }}>
-            nightly bias engine
-          </p>
-          <p style={{ fontSize: "11px", color: "#2a2a2a", marginBottom: "52px", fontFamily: "JetBrains Mono, monospace" }}>
-            gex · entropy · topology · iv surface · macro
-          </p>
+      {/* left edge accent line */}
+      <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: "2px", background: "linear-gradient(to bottom, transparent, rgba(0,200,150,0.4), transparent)" }} />
 
+      {/* top bar */}
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, padding: "20px 32px", display: "flex", justifyContent: "space-between", alignItems: "center", zIndex: 10 }}>
+        <span style={{ fontSize: "10px", letterSpacing: "0.4em", color: "#1a1a1a", fontFamily: "JetBrains Mono, monospace", textTransform: "uppercase" }}>
+          yyy research
+        </span>
+        <span style={{ fontSize: "10px", letterSpacing: "0.2em", color: "#1a1a1a", fontFamily: "JetBrains Mono, monospace" }}>
+          {new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+        </span>
+      </div>
+
+      {/* main content — left aligned, vertically centered */}
+      <div style={{ position: "relative", zIndex: 10, height: "100%", display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 10vw" }}>
+
+        {/* label */}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "32px" }}>
+          <div style={{ width: "24px", height: "1px", background: "rgba(0,200,150,0.5)" }} />
+          <span style={{ fontSize: "10px", letterSpacing: "0.35em", color: "rgba(0,200,150,0.6)", fontFamily: "JetBrains Mono, monospace", textTransform: "uppercase" }}>
+            market intelligence
+          </span>
+        </div>
+
+        {/* giant yyy */}
+        <h1 style={{
+          fontSize: "clamp(80px, 14vw, 180px)",
+          fontWeight: 600,
+          color: "#e8e8e8",
+          letterSpacing: "-0.04em",
+          lineHeight: 0.9,
+          margin: "0 0 32px",
+          fontFamily: "JetBrains Mono, monospace",
+        }}>
+          yyy
+        </h1>
+
+        {/* descriptor */}
+        <p style={{ fontSize: "13px", color: "#333", marginBottom: "48px", fontFamily: "JetBrains Mono, monospace", maxWidth: "400px", lineHeight: 1.8 }}>
+          gamma exposure · entropy · topology<br />
+          nightly bias engine · iv surface
+        </p>
+
+        {/* cta */}
+        <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
           <button
             onClick={() => router.push("/dashboard")}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
             style={{
-              padding: "13px 36px",
-              border: `0.5px solid ${hovered ? "#00c896" : "#2a2a2a"}`,
-              background: hovered ? "rgba(0,200,150,0.05)" : "transparent",
-              color: hovered ? "#00c896" : "#666",
+              padding: "14px 40px",
+              border: `1px solid ${hovered ? "rgba(0,200,150,0.8)" : "rgba(0,200,150,0.2)"}`,
+              background: hovered ? "rgba(0,200,150,0.08)" : "transparent",
+              color: hovered ? "#00c896" : "#555",
               fontSize: "11px",
-              letterSpacing: "0.15em",
+              letterSpacing: "0.2em",
               textTransform: "uppercase",
               cursor: "pointer",
               fontFamily: "JetBrains Mono, monospace",
@@ -150,14 +151,19 @@ export default function Landing() {
               outline: "none",
             }}
           >
-            launch terminal →
+            enter terminal
           </button>
+          <span style={{ fontSize: "10px", color: "#222", fontFamily: "JetBrains Mono, monospace", letterSpacing: "0.1em" }}>
+            not financial advice
+          </span>
         </div>
       </div>
 
-      <p style={{ position: "absolute", bottom: "28px", left: "50%", transform: "translateX(-50%)", fontSize: "10px", color: "#222", fontFamily: "JetBrains Mono, monospace", letterSpacing: "0.1em" }}>
-        not financial advice
-      </p>
+      {/* bottom right — live indicator */}
+      <div style={{ position: "absolute", bottom: "28px", right: "32px", display: "flex", alignItems: "center", gap: "8px", zIndex: 10 }}>
+        <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#00c896", boxShadow: "0 0 6px #00c896", animation: "pulse 2s infinite" }} />
+        <span style={{ fontSize: "9px", letterSpacing: "0.2em", color: "#222", fontFamily: "JetBrains Mono, monospace", textTransform: "uppercase" }}>live</span>
+      </div>
     </div>
   )
 }
