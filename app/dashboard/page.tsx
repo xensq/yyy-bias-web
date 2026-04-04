@@ -5,11 +5,13 @@ import BiasTab from "@/components/tabs/BiasTab"
 import TopologyTab from "@/components/tabs/TopologyTab"
 import GexTab from "@/components/tabs/GexTab"
 import NetIVTab from "@/components/tabs/NetIVTab"
+import ZeroDTETab from "@/components/tabs/ZeroDTETab"
+import DealerDeltaTab from "@/components/tabs/DealerDeltaTab"
 import IVSurfaceTab from "@/components/tabs/IVSurfaceTab"
 import MacroTab from "@/components/tabs/MacroTab"
 import { useRouter } from "next/navigation"
 
-const TABS = ["bias", "topology", "gex", "net iv", "iv surface", "macro"] as const
+const TABS = ["bias", "topology", "gex", "net iv", "iv surface", "0dte", "dealer", "macro"] as const
 type Tab = typeof TABS[number]
 
 const THEMES = [
@@ -110,6 +112,8 @@ export default function Dashboard() {
 
         {/* IV Surface doesn't need bias data */}
         {tab === "iv surface" && <IVSurfaceTab />}
+        {tab === "0dte" && <ZeroDTETab />}
+        {tab === "dealer" && <DealerDeltaTab />}
 
         {data && !loading && (
           <>
