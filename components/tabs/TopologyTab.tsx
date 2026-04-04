@@ -22,7 +22,7 @@ function BarChart({ data, label, color, threshold }: { data: number[]; label: st
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas || !data.length) return
-    const ctx = canvas.getContext("2d")!
+    const ctx = canvas.getContext("2d"); if (!ctx) return
     const W = canvas.width, H = canvas.height
     ctx.clearRect(0, 0, W, H)
 
@@ -80,7 +80,7 @@ function EntropyLineChart({ entropy, threshold }: { entropy: number[]; threshold
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas || !entropy.length) return
-    const ctx = canvas.getContext("2d")!
+    const ctx = canvas.getContext("2d"); if (!ctx) return
     const W = canvas.width, H = canvas.height
     ctx.clearRect(0, 0, W, H)
 
