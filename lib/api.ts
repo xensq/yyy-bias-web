@@ -19,11 +19,7 @@ export async function fetchOutlook() {
 }
 
 export interface StrikeData {
-  strike: number
-  call_gex: number
-  put_gex: number
-  call_oi: number
-  put_oi: number
+  strike: number; call_gex: number; put_gex: number; call_oi: number; put_oi: number
 }
 
 export interface BiasData {

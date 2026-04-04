@@ -1,206 +1,247 @@
-interface Props {
-  topology: {
-    pca1: number; pca2: number; vol_z: number; regime: string
-    dist: number; aligned: boolean; size_factor: number; price: number; error: string | null
+"use client"
+import { useEffect, useState, useRef } from "react"
+
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+
+interface TopoProps {
+  topology: { pca1: number; pca2: number; vol_z: number; regime: string; dist: number; aligned: boolean; price: number; error: string | null }
+  entropy: { entropy: number; threshold: number; rho: number; status: string; size_factor: number; trend: string; error: string | null }
+}
+
+interface HistData { pca1: number[]; pca2: number[]; vol_z: number[]; entropy: number[]; threshold: number[]; n: number }
+
+const REGIME_COLOR: Record<string, string> = {
+  "BULL TREND": "#00c896", "BEAR TREND": "#ff5555",
+  CONSOLIDATION: "#f0c040", EXTENDED: "#f97316", UNCHARTED: "#ff5555"
+}
+const ENT_COLOR: Record<string, string> = { NORMAL: "#00c896", ELEVATED: "#f0c040", CRITICAL: "#ff5555" }
+
+function BarChart({ data, label, color, threshold }: { data: number[]; label: string; color: (v: number) => string; threshold?: number }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas || !data.length) return
+    const ctx = canvas.getContext("2d")!
+    const W = canvas.width, H = canvas.height
+    ctx.clearRect(0, 0, W, H)
+
+    const max = Math.max(...data.map(Math.abs)) || 1
+    const barW = Math.max(1, W / data.length - 0.5)
+    const midY = H / 2
+
+    // Zero line
+    ctx.beginPath()
+    ctx.moveTo(0, midY)
+    ctx.lineTo(W, midY)
+    ctx.strokeStyle = "#1a1a1a"
+    ctx.lineWidth = 1
+    ctx.stroke()
+
+    // Threshold line for entropy
+    if (threshold !== undefined) {
+      const tY = H - (threshold / (max * 1.1)) * H
+      ctx.beginPath()
+      ctx.moveTo(0, tY)
+      ctx.lineTo(W, tY)
+      ctx.strokeStyle = "rgba(240,192,64,0.4)"
+      ctx.lineWidth = 0.8
+      ctx.setLineDash([4, 4])
+      ctx.stroke()
+      ctx.setLineDash([])
+    }
+
+    // Bars
+    data.forEach((v, i) => {
+      const x = i * (barW + 0.5)
+      const h = Math.abs(v) / (max * 1.1) * (H / 2 - 2)
+      const y = v >= 0 ? midY - h : midY
+      ctx.fillStyle = color(v)
+      ctx.fillRect(x, v >= 0 ? y : midY, barW, h)
+    })
+
+    // Current value dot
+    const last = data[data.length - 1]
+    const lastX = (data.length - 1) * (barW + 0.5) + barW / 2
+    const lastH = Math.abs(last) / (max * 1.1) * (H / 2 - 2)
+    const lastY = last >= 0 ? midY - lastH : midY + lastH
+    ctx.beginPath()
+    ctx.arc(lastX, lastY, 2.5, 0, Math.PI * 2)
+    ctx.fillStyle = "#fff"
+    ctx.fill()
+  }, [data, threshold])
+
+  return <canvas ref={canvasRef} width={560} height={80} style={{ width: "100%", height: "80px", display: "block" }} />
+}
+
+function EntropyLineChart({ entropy, threshold }: { entropy: number[]; threshold: number[] }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas || !entropy.length) return
+    const ctx = canvas.getContext("2d")!
+    const W = canvas.width, H = canvas.height
+    ctx.clearRect(0, 0, W, H)
+
+    const allVals = [...entropy, ...threshold]
+    const maxV = Math.max(...allVals) * 1.1
+    const toY = (v: number) => H - (v / maxV) * H
+
+    const stepX = W / (entropy.length - 1)
+
+    // Threshold area fill
+    ctx.beginPath()
+    threshold.forEach((v, i) => { i === 0 ? ctx.moveTo(0, toY(v)) : ctx.lineTo(i * stepX, toY(v)) })
+    ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.closePath()
+    ctx.fillStyle = "rgba(240,192,64,0.04)"
+    ctx.fill()
+
+    // Threshold line
+    ctx.beginPath()
+    threshold.forEach((v, i) => { i === 0 ? ctx.moveTo(0, toY(v)) : ctx.lineTo(i * stepX, toY(v)) })
+    ctx.strokeStyle = "rgba(240,192,64,0.35)"
+    ctx.lineWidth = 1
+    ctx.setLineDash([5, 4])
+    ctx.stroke()
+    ctx.setLineDash([])
+
+    // Entropy line — color by threshold crossing
+    for (let i = 1; i < entropy.length; i++) {
+      const x1 = (i - 1) * stepX, x2 = i * stepX
+      const y1 = toY(entropy[i - 1]), y2 = toY(entropy[i])
+      const aboveThresh = entropy[i] > threshold[i]
+      ctx.beginPath()
+      ctx.moveTo(x1, y1)
+      ctx.lineTo(x2, y2)
+      ctx.strokeStyle = aboveThresh ? "rgba(255,85,85,0.8)" : "rgba(0,200,150,0.7)"
+      ctx.lineWidth = 1.2
+      ctx.stroke()
+    }
+
+    // Current dot
+    const lastX = (entropy.length - 1) * stepX
+    const lastY = toY(entropy[entropy.length - 1])
+    ctx.beginPath()
+    ctx.arc(lastX, lastY, 3, 0, Math.PI * 2)
+    ctx.fillStyle = entropy[entropy.length - 1] > threshold[threshold.length - 1] ? "#ff5555" : "#00c896"
+    ctx.fill()
+  }, [entropy, threshold])
+
+  return <canvas ref={canvasRef} width={560} height={100} style={{ width: "100%", height: "100px", display: "block" }} />
+}
+
+export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
+  const [hist, setHist] = useState<HistData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const rc = REGIME_COLOR[t.regime] || "#666"
+  const ec = ENT_COLOR[e.status] || "#666"
+
+  useEffect(() => {
+    fetch(`${API}/history`)
+      .then(r => r.json())
+      .then(setHist)
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  const trendColor = (v: number) => {
+    if (v > 1.0) return "rgba(0,200,150,0.7)"
+    if (v > 0) return "rgba(0,200,150,0.35)"
+    if (v < -1.0) return "rgba(255,85,85,0.7)"
+    if (v < 0) return "rgba(255,85,85,0.35)"
+    return "rgba(80,80,80,0.5)"
   }
-  entropy: {
-    entropy: number; threshold: number; rho: number; status: string
-    size_factor: number; trend: string; error: string | null
+
+  const momColor = (v: number) => {
+    if (v > 0.5) return "rgba(0,180,255,0.7)"
+    if (v > 0) return "rgba(0,180,255,0.35)"
+    if (v < -0.5) return "rgba(255,140,0,0.7)"
+    if (v < 0) return "rgba(255,140,0,0.35)"
+    return "rgba(80,80,80,0.5)"
   }
-}
 
-const REGIME_COLORS: Record<string, string> = {
-  "BULL TREND": "#00c896", "BEAR TREND": "#ff4444",
-  "CONSOLIDATION": "#f59e0b", "EXTENDED": "#f97316", "UNCHARTED": "#ff4444"
-}
+  const volColor = (v: number) => {
+    if (v > 1.5) return "rgba(255,85,85,0.8)"
+    if (v > 0.5) return "rgba(240,192,64,0.7)"
+    return "rgba(100,100,100,0.5)"
+  }
 
-const ENTROPY_COLORS: Record<string, string> = {
-  NORMAL: "#00c896", ELEVATED: "#f59e0b", CRITICAL: "#ff4444"
-}
-
-export default function TopologyTab({ topology: t, entropy: e }: Props) {
-  const regimeColor = REGIME_COLORS[t.regime] || "#666"
-  const entropyColor = ENTROPY_COLORS[e.status] || "#666"
-
-  // PCA regime map dimensions
-  const W = 480, H = 320
-  const cx = W / 2, cy = H / 2
-  const scale = 80  // pixels per unit
-
-  // Current dot position (clamped so it doesn't go off canvas)
-  const dotX = cx + Math.max(-cx + 20, Math.min(cx - 20, t.pca1 * scale))
-  const dotY = cy - Math.max(-cy + 20, Math.min(cy - 20, t.pca2 * scale))
-
-  // Entropy gauge
-  const rhoPercent = Math.min(e.rho / 1.5 * 100, 100)
+  const Panel = ({ children, label, value, color }: { children: React.ReactNode; label: string; value: string; color: string }) => (
+    <div style={{ border: "0.5px solid #1a1a1a", borderRadius: "6px", padding: "14px 16px", background: "#0a0a0a" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+        <span style={{ fontSize: "9px", letterSpacing: "0.25em", color: "#333", textTransform: "uppercase" }}>{label}</span>
+        <span style={{ fontSize: "12px", fontFamily: "JetBrains Mono, monospace", color, fontWeight: 500 }}>{value}</span>
+      </div>
+      {children}
+    </div>
+  )
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
 
-        {/* PCA Regime Map */}
-        <div className="border border-border rounded-lg p-5">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-dim text-xs uppercase tracking-widest">regime map</p>
-            <span className="text-xs font-medium" style={{ color: regimeColor }}>{t.regime}</span>
+      {/* status bar */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "10px" }}>
+        {[
+          { label: "regime", value: t.regime, color: rc },
+          { label: "pca1 trend", value: `${t.pca1 >= 0 ? "+" : ""}${t.pca1.toFixed(3)}`, color: t.pca1 > 1 ? "#00c896" : t.pca1 < -1 ? "#ff5555" : "#666" },
+          { label: "pca2 momentum", value: `${t.pca2 >= 0 ? "+" : ""}${t.pca2.toFixed(3)}`, color: t.aligned ? "#00c896" : "#f0c040" },
+          { label: "entropy", value: `${e.rho.toFixed(3)}×`, color: ec },
+          { label: "vol z-score", value: `${t.vol_z >= 0 ? "+" : ""}${t.vol_z.toFixed(3)}`, color: t.vol_z > 1.5 ? "#ff5555" : t.vol_z > 0.5 ? "#f0c040" : "#555" },
+        ].map(({ label, value, color }) => (
+          <div key={label} style={{ border: "0.5px solid #1a1a1a", borderRadius: "6px", padding: "12px 14px", background: "#0a0a0a" }}>
+            <p style={{ fontSize: "9px", letterSpacing: "0.2em", color: "#333", textTransform: "uppercase", marginBottom: "6px" }}>{label}</p>
+            <p style={{ fontSize: "12px", fontFamily: "JetBrains Mono, monospace", color, fontWeight: 500 }}>{value}</p>
           </div>
-
-          <svg width="100%" viewBox={`0 0 ${W} ${H}`} className="overflow-visible">
-            {/* grid */}
-            {[-2,-1,0,1,2].map(i => (
-              <g key={i}>
-                <line x1={cx + i*scale} y1={20} x2={cx + i*scale} y2={H-20}
-                  stroke="#1a1a1a" strokeWidth="1" />
-                <line x1={20} y1={cy - i*scale} x2={W-20} y2={cy - i*scale}
-                  stroke="#1a1a1a" strokeWidth="1" />
-              </g>
-            ))}
-
-            {/* regime zones */}
-            {/* bull trend zone */}
-            <rect x={cx + 1*scale} y={20} width={cx - 1*scale - 20} height={H-40}
-              fill="rgba(0,200,150,0.04)" />
-            {/* bear trend zone */}
-            <rect x={20} y={20} width={cx - 1*scale - 20} height={H-40}
-              fill="rgba(255,68,68,0.04)" />
-
-            {/* axes */}
-            <line x1={cx} y1={20} x2={cx} y2={H-20} stroke="#2a2a2a" strokeWidth="1" />
-            <line x1={20} y1={cy} x2={W-20} y2={cy} stroke="#2a2a2a" strokeWidth="1" />
-
-            {/* threshold lines */}
-            <line x1={cx + 1*scale} y1={20} x2={cx + 1*scale} y2={H-20}
-              stroke="#333" strokeWidth="1" strokeDasharray="4,4" />
-            <line x1={cx - 1*scale} y1={20} x2={cx - 1*scale} y2={H-20}
-              stroke="#333" strokeWidth="1" strokeDasharray="4,4" />
-
-            {/* axis labels */}
-            <text x={W-15} y={cy+4} fill="#333" fontSize="10" textAnchor="end">trend →</text>
-            <text x={cx+4} y={30} fill="#333" fontSize="10">mom ↑</text>
-
-            {/* zone labels */}
-            <text x={cx + 1.5*scale} y={40} fill="rgba(0,200,150,0.4)" fontSize="9" textAnchor="middle">BULL</text>
-            <text x={cx - 1.5*scale} y={40} fill="rgba(255,68,68,0.4)" fontSize="9" textAnchor="middle">BEAR</text>
-
-            {/* mahalanobis distance circle */}
-            <circle cx={cx} cy={cy} r={t.dist * scale}
-              fill="none" stroke="#2a2a2a" strokeWidth="1" strokeDasharray="3,3" />
-
-            {/* current position */}
-            <circle cx={dotX} cy={dotY} r={8}
-              fill={regimeColor} opacity={0.2} />
-            <circle cx={dotX} cy={dotY} r={4}
-              fill={regimeColor} />
-
-            {/* crosshairs */}
-            <line x1={dotX} y1={cy} x2={dotX} y2={dotY}
-              stroke={regimeColor} strokeWidth="0.5" opacity={0.3} />
-            <line x1={cx} y1={dotY} x2={dotX} y2={dotY}
-              stroke={regimeColor} strokeWidth="0.5" opacity={0.3} />
-          </svg>
-
-          <div className="grid grid-cols-3 gap-3 mt-3 pt-3 border-t border-border">
-            {[
-              { label: "pca1", value: `${t.pca1 >= 0 ? "+" : ""}${t.pca1.toFixed(3)}` },
-              { label: "pca2", value: `${t.pca2 >= 0 ? "+" : ""}${t.pca2.toFixed(3)}` },
-              { label: "dist", value: t.dist.toFixed(3) },
-            ].map(({ label, value }) => (
-              <div key={label} className="text-center">
-                <p className="text-dim text-xs">{label}</p>
-                <p className="text-text text-xs font-mono mt-0.5">{value}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Entropy gauge */}
-        <div className="border border-border rounded-lg p-5">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-dim text-xs uppercase tracking-widest">entropy</p>
-            <span className="text-xs font-medium" style={{ color: entropyColor }}>{e.status}</span>
-          </div>
-
-          {/* big rho display */}
-          <div className="text-center py-6">
-            <p className="text-dim text-xs uppercase tracking-widest mb-2">vs threshold</p>
-            <p className="text-5xl font-semibold" style={{ color: entropyColor }}>
-              {e.rho.toFixed(3)}×
-            </p>
-            <p className="text-dim text-xs mt-2">
-              {e.trend === "rising" ? "↑ rising into close" : "↓ falling into close"}
-            </p>
-          </div>
-
-          {/* gauge bar */}
-          <div className="mb-6">
-            <div className="flex justify-between text-xs text-muted mb-1">
-              <span>0×</span>
-              <span className="text-dim">normal</span>
-              <span className="text-warn">1.0×</span>
-              <span className="text-bear">1.2×</span>
-              <span>1.5×</span>
-            </div>
-            <div className="h-2 bg-border rounded-full overflow-hidden relative">
-              {/* normal zone */}
-              <div className="absolute inset-y-0 left-0 bg-bull/20 rounded-full"
-                style={{ width: "66.7%" }} />
-              {/* elevated zone */}
-              <div className="absolute inset-y-0 bg-warn/20"
-                style={{ left: "66.7%", width: "13.3%" }} />
-              {/* critical zone */}
-              <div className="absolute inset-y-0 bg-bear/20 rounded-r-full"
-                style={{ left: "80%", right: 0 }} />
-              {/* current marker */}
-              <div className="absolute inset-y-0 w-0.5 rounded-full"
-                style={{
-                  left: `${Math.min(rhoPercent, 99)}%`,
-                  background: entropyColor
-                }} />
-            </div>
-          </div>
-
-          <div className="space-y-2 pt-3 border-t border-border">
-            {[
-              { label: "entropy", value: e.entropy.toFixed(6) },
-              { label: "threshold", value: e.threshold.toFixed(6) },
-              { label: "size factor", value: `${(e.size_factor * 100).toFixed(0)}%` },
-            ].map(({ label, value }) => (
-              <div key={label} className="flex justify-between">
-                <span className="text-dim text-xs">{label}</span>
-                <span className="text-text text-xs font-mono">{value}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        ))}
       </div>
 
-      {/* vol z-score bar */}
-      <div className="border border-border rounded-lg p-5">
-        <p className="text-dim text-xs uppercase tracking-widest mb-4">volatility z-score</p>
-        <div className="flex items-center gap-4">
-          <span className="text-dim text-xs w-20">compressed</span>
-          <div className="flex-1 h-1 bg-border rounded-full relative overflow-hidden">
-            <div className="absolute inset-y-0 w-px bg-border" style={{ left: "50%" }} />
-            <div className="absolute inset-y-0 rounded-full"
-              style={{
-                left: t.vol_z >= 0 ? "50%" : `${50 + t.vol_z * 10}%`,
-                width: `${Math.abs(t.vol_z) * 10}%`,
-                background: t.vol_z > 1 ? "#ff4444" : t.vol_z > 0 ? "#f59e0b" : "#00c896",
-                maxWidth: "50%"
-              }} />
-          </div>
-          <span className="text-dim text-xs w-20 text-right">elevated</span>
-          <span className="text-text text-xs font-mono w-16 text-right">
-            {t.vol_z >= 0 ? "+" : ""}{t.vol_z.toFixed(3)}
-          </span>
+      {loading ? (
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "#333", fontSize: "12px", padding: "20px 0" }}>
+          <div style={{ width: "5px", height: "5px", background: "#00c896", borderRadius: "50%" }} />
+          loading chart data...
         </div>
-        <p className="text-dim text-xs mt-2">
-          {t.vol_z > 1.5 ? "vol significantly above average — widen stops, reduce size"
-           : t.vol_z > 0.5 ? "vol slightly elevated — normal caution"
-           : t.vol_z < -0.5 ? "vol compressed — potential expansion incoming"
-           : "vol near average — normal conditions"}
-        </p>
-      </div>
+      ) : hist && !hist.error ? (
+        <>
+          {/* Trend */}
+          <Panel label="trend (pca1)" value={`${t.pca1 >= 0 ? "+" : ""}${t.pca1.toFixed(3)}`} color={t.pca1 > 1 ? "#00c896" : t.pca1 < -1 ? "#ff5555" : "#555"}>
+            <BarChart data={hist.pca1} label="pca1" color={trendColor} />
+            <p style={{ fontSize: "10px", color: "#333", marginTop: "6px" }}>
+              {t.pca1 > 1 ? "buyers in structural control" : t.pca1 < -1 ? "sellers in structural control" : "no dominant structural direction"}
+            </p>
+          </Panel>
+
+          {/* Momentum */}
+          <Panel label="momentum (pca2)" value={`${t.pca2 >= 0 ? "+" : ""}${t.pca2.toFixed(3)}`} color={t.aligned ? "#00c896" : "#f0c040"}>
+            <BarChart data={hist.pca2} label="pca2" color={momColor} />
+            <p style={{ fontSize: "10px", color: "#333", marginTop: "6px" }}>
+              {t.aligned ? "momentum aligned with trend — signals reliable" : "momentum diverging from trend — reduce conviction"}
+            </p>
+          </Panel>
+
+          {/* Entropy */}
+          <Panel label={`entropy — ${e.status}`} value={`${e.rho.toFixed(3)}× threshold`} color={ec}>
+            <EntropyLineChart entropy={hist.entropy} threshold={hist.threshold} />
+            <div style={{ display: "flex", gap: "20px", marginTop: "8px" }}>
+              <span style={{ fontSize: "10px", color: "#333" }}>current {e.entropy.toFixed(5)}</span>
+              <span style={{ fontSize: "10px", color: "#555" }}>threshold {e.threshold.toFixed(5)}</span>
+              <span style={{ fontSize: "10px", color: e.trend === "rising" ? "#f0c040" : "#555" }}>
+                {e.trend === "rising" ? "↑ rising into close" : "↓ falling into close"}
+              </span>
+            </div>
+          </Panel>
+
+          {/* Volatility */}
+          <Panel label="volatility z-score" value={`${t.vol_z >= 0 ? "+" : ""}${t.vol_z.toFixed(3)}`} color={t.vol_z > 1.5 ? "#ff5555" : t.vol_z > 0.5 ? "#f0c040" : "#555"}>
+            <BarChart data={hist.vol_z} label="vol_z" color={volColor} />
+            <p style={{ fontSize: "10px", color: "#333", marginTop: "6px" }}>
+              {t.vol_z > 1.5 ? "vol significantly elevated — widen stops, reduce size" : t.vol_z > 0.5 ? "vol slightly above average — normal caution" : t.vol_z < -0.5 ? "vol compressed — expansion likely incoming" : "vol near historical average"}
+            </p>
+          </Panel>
+        </>
+      ) : (
+        <p style={{ fontSize: "12px", color: "#444", padding: "20px 0" }}>chart data unavailable</p>
+      )}
     </div>
   )
 }

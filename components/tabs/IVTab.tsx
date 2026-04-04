@@ -4,22 +4,21 @@ import { fetchIV, IVData } from "@/lib/api"
 
 function cellClass(v: number | null): string {
   if (v === null) return "cell-empty"
-  if (v >= 0.3)  return "cell-strong-bull"
-  if (v >= 0.05) return "cell-mild-bull"
-  if (v <= -0.3) return "cell-strong-bear"
-  if (v <= -0.05) return "cell-mild-bear"
+  if (v >= 0.5) return "cell-strong-bull"
+  if (v >= 0.1) return "cell-mild-bull"
+  if (v <= -0.5) return "cell-strong-bear"
+  if (v <= -0.1) return "cell-mild-bear"
   return "cell-neutral"
 }
 
 function fmtExp(exp: string): string {
   const d = new Date(exp + "T00:00:00")
-  return `${(d.getMonth()+1).toString().padStart(2,"0")}/${d.getDate().toString().padStart(2,"0")}`
+  return `${(d.getMonth() + 1).toString().padStart(2, "0")}/${d.getDate().toString().padStart(2, "0")}`
 }
 
 function fmtVal(v: number | null): string {
   if (v === null) return "—"
-  const sign = v >= 0 ? "+" : ""
-  return `${sign}${v.toFixed(1)}%`
+  return `${v >= 0 ? "+" : ""}${v.toFixed(1)}%`
 }
 
 export default function IVTab() {
@@ -35,55 +34,53 @@ export default function IVTab() {
   }, [])
 
   if (loading) return (
-    <div className="flex items-center gap-3 text-dim text-xs mt-8">
-      <div className="w-1.5 h-1.5 bg-bull rounded-full animate-pulse" />
-      pulling options chains... this takes ~20 seconds
+    <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "#444", fontSize: "12px", marginTop: "32px", fontFamily: "JetBrains Mono, monospace" }}>
+      <div style={{ width: "5px", height: "5px", background: "#00c896", borderRadius: "50%" }} />
+      pulling options chains — takes ~20 seconds
     </div>
   )
 
   if (error || data?.error) return (
-    <div className="text-bear text-xs mt-4">{error || data?.error}</div>
+    <div style={{ color: "#ff5555", fontSize: "12px", marginTop: "16px", fontFamily: "JetBrains Mono, monospace" }}>{error || data?.error}</div>
   )
 
   if (!data) return null
 
   return (
-    <div className="space-y-4">
+    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
       {/* header */}
-      <div className="flex items-center justify-between">
+      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
         <div>
-          <p className="text-dim text-xs uppercase tracking-widest">net iv</p>
-          <p className="text-muted text-xs mt-1">
-            change in implied volatility from session open · spot {data.spot.toLocaleString()}
+          <p style={{ fontSize: "9px", letterSpacing: "0.3em", color: "#333", textTransform: "uppercase", marginBottom: "6px" }}>net iv surface</p>
+          <p style={{ fontSize: "12px", color: "#555", fontFamily: "JetBrains Mono, monospace" }}>
+            spx · spot {data.spot.toLocaleString()} · change from session open
           </p>
         </div>
-        <div className="flex items-center gap-4 text-xs">
-          <span className="flex items-center gap-1.5">
-            <span className="inline-block w-2 h-2 rounded-sm bg-bull/40" />
-            <span className="text-dim">rising IV</span>
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="inline-block w-2 h-2 rounded-sm bg-bear/40" />
-            <span className="text-dim">falling IV</span>
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="inline-block w-2 h-2 rounded-sm bg-border" />
-            <span className="text-dim">flat</span>
-          </span>
+        <div style={{ display: "flex", gap: "16px", fontSize: "10px" }}>
+          {[
+            { bg: "rgba(0,200,150,0.25)", color: "#00c896", label: "IV rising" },
+            { bg: "rgba(255,85,85,0.25)", color: "#ff5555", label: "IV falling" },
+            { bg: "transparent", color: "#444", label: "flat / no data" },
+          ].map(({ bg, color, label }) => (
+            <span key={label} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <span style={{ width: "10px", height: "10px", background: bg, border: "0.5px solid #1a1a1a", display: "inline-block", borderRadius: "2px" }} />
+              <span style={{ color: "#444", fontFamily: "JetBrains Mono, monospace" }}>{label}</span>
+            </span>
+          ))}
         </div>
       </div>
 
       {/* table */}
-      <div className="border border-border rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs font-mono">
+      <div style={{ border: "0.5px solid #1a1a1a", borderRadius: "8px", overflow: "hidden" }}>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", fontSize: "11px", fontFamily: "JetBrains Mono, monospace", borderCollapse: "collapse" }}>
             <thead>
-              <tr className="border-b border-border">
-                <th className="text-left px-4 py-2.5 text-dim font-normal sticky left-0 bg-surface min-w-20">
+              <tr style={{ borderBottom: "0.5px solid #1a1a1a" }}>
+                <th style={{ textAlign: "left", padding: "10px 16px", color: "#333", fontWeight: 400, position: "sticky", left: 0, background: "#0a0a0a", minWidth: "76px", fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase" }}>
                   strike
                 </th>
                 {data.expirations.map(exp => (
-                  <th key={exp} className="px-3 py-2.5 text-dim font-normal text-center min-w-14 whitespace-nowrap">
+                  <th key={exp} style={{ padding: "10px 10px", color: "#333", fontWeight: 400, textAlign: "center", minWidth: "52px", whiteSpace: "nowrap", fontSize: "10px" }}>
                     {fmtExp(exp)}
                   </th>
                 ))}
@@ -91,15 +88,14 @@ export default function IVTab() {
             </thead>
             <tbody>
               {data.table.map((row, i) => (
-                <tr key={row.strike}
-                  className={`border-b border-border/50 last:border-0 ${i % 2 === 0 ? "bg-transparent" : "bg-white/[0.01]"}`}>
-                  <td className="px-4 py-1.5 text-dim sticky left-0 bg-inherit font-medium">
+                <tr key={row.strike} style={{ borderBottom: "0.5px solid rgba(255,255,255,0.02)" }}>
+                  <td style={{ padding: "5px 16px", color: "#555", position: "sticky", left: 0, background: i % 2 === 0 ? "#0a0a0a" : "#0d0d0d", fontWeight: 500, fontSize: "11px" }}>
                     {row.strike.toLocaleString()}
                   </td>
                   {data.expirations.map(exp => {
                     const val = row.values[exp] ?? null
                     return (
-                      <td key={exp} className={`px-3 py-1.5 text-center ${cellClass(val)}`}>
+                      <td key={exp} className={cellClass(val)} style={{ padding: "5px 10px", textAlign: "center", fontSize: "10px" }}>
                         {fmtVal(val)}
                       </td>
                     )
@@ -111,7 +107,7 @@ export default function IVTab() {
         </div>
       </div>
 
-      <p className="text-muted text-xs">
+      <p style={{ fontSize: "10px", color: "#2a2a2a", fontFamily: "JetBrains Mono, monospace" }}>
         baseline set at first load of the day · resets each session · values in IV percentage points
       </p>
     </div>
