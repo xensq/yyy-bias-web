@@ -18,7 +18,7 @@ export default function GexTab({ gex: g }: GexProps) {
     if (!g.strike_data?.length) return []
     const atm = g.spot || g.vol_trigger || 5000
     return [...g.strike_data]
-      .filter(s => Math.abs(s.strike / atm - 1) <= 0.04)
+      .filter(s => Math.abs(s.strike / atm - 1) <= 0.025)
       .sort((a, b) => b.strike - a.strike)
   }, [g.strike_data])
 
@@ -126,7 +126,7 @@ export default function GexTab({ gex: g }: GexProps) {
 
             {/* Vol trigger — gold */}
             <line x1={Y_LABEL_W} x2={Y_LABEL_W+CHART_W} y1={triggerY} y2={triggerY} stroke="rgba(240,192,64,0.65)" strokeWidth="0.8" strokeDasharray="5,3" />
-            <text x={Y_LABEL_W+CHART_W-4} y={triggerY-3} textAnchor="end" fontSize="8" fill="#f0c040" fontFamily="JetBrains Mono, monospace">vol trigger {g.vol_trigger.toLocaleString()}</text>
+            <text x={Y_LABEL_W+CHART_W-4} y={triggerY-3} textAnchor="end" fontSize="8" fill="#f0.0250" fontFamily="JetBrains Mono, monospace">vol trigger {g.vol_trigger.toLocaleString()}</text>
 
             {/* Call wall — soft teal */}
             <line x1={Y_LABEL_W} x2={Y_LABEL_W+CHART_W} y1={callWallY} y2={callWallY} stroke="rgba(0,200,150,0.4)" strokeWidth="0.8" strokeDasharray="4,3" />
