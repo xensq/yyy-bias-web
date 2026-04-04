@@ -2,6 +2,9 @@
 import { useMemo, useState, useEffect } from "react"
 import { StrikeData } from "@/lib/api"
 
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+const TICKERS = ["SPX", "NDX", "SPY", "QQQ"]
+
 interface GexProps {
   gex: {
     spot: number; vol_trigger: number; call_wall: number; put_wall: number
