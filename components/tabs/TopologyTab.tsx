@@ -273,7 +273,7 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
                   y: hist.pca1,
                   z: Array(hist.pca1.length).fill(0),
                   mode: "lines" as const,
-                  line: { color: hist.pca1.map((v: number) => v > 1 ? "#00c896" : v < -1 ? "#ff5555" : "#2a4a3a"), width: 3, colorscale: [[0,"#ff5555"],[0.5,"#2a4a3a"],[1,"#00c896"]] as any },
+                  line: { color: "#00c896", width: 3 },
                   name: "PCA1 Trend",
                   hovertemplate: "trend: %{y:.3f}<extra></extra>"
                 },
@@ -293,7 +293,7 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
                   y: hist.vol_z.map((v: number) => v * 0.3),
                   z: hist.vol_z.map((v: number) => v * 0.3),
                   mode: "lines" as const,
-                  line: { color: hist.vol_z.map((v: number) => v > 1.5 ? "#ff5555" : v > 0.5 ? "#f0c040" : "#444"), width: 2, colorscale: [[0,"#444"],[0.5,"#f0c040"],[1,"#ff5555"]] as any },
+                  line: { color: "#f0c040", width: 2 },
                   name: "Vol Z",
                   hovertemplate: "vol z: %{y:.3f}<extra></extra>"
                 },
