@@ -8,7 +8,7 @@ interface TopoProps {
   entropy: { entropy: number; threshold: number; rho: number; status: string; size_factor: number; trend: string; error: string | null }
 }
 
-interface HistData { pca1: number[]; pca2: number[]; vol_z: number[]; entropy: number[]; threshold: number[]; n: number }
+interface HistData { pca1: number[]; pca2: number[]; vol_z: number[]; entropy: number[]; threshold: number[]; n: number; error?: string | null }
 
 const REGIME_COLOR: Record<string, string> = {
   "BULL TREND": "#00c896", "BEAR TREND": "#ff5555",
