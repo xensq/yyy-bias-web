@@ -26,6 +26,7 @@ export default function Landing() {
       opacity: Math.random() * 0.4 + 0.1
     }))
 
+    const stars = Array.from({ length: 100 }, () => ({ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight, r: Math.random() * 1.2 + 0.3, speed: Math.random() * 0.2 + 0.05, opacity: Math.random() * 0.5 + 0.1 }))
     let t = 0
 
     const draw = () => {
@@ -42,6 +43,7 @@ export default function Landing() {
         ctx.fill()
       })
 
+      stars.forEach(s => { s.y -= s.speed; if (s.y < 0) { s.y = H; s.x = Math.random() * W } ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fillStyle = "rgba(0,200,150," + (s.opacity * (0.6 + 0.4 * Math.sin(t * 0.02 + s.x))) + ")"; ctx.fill() })
       // Animated grid
       const COLS = Math.ceil(W / 80) + 1
       const ROWS = Math.ceil(H / 80) + 1
