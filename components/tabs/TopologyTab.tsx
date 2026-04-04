@@ -260,24 +260,82 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
         </div>
       ) : hist && !hist.error ? (
         <>
-          {/* Trend */}
-          <Panel label="trend (pca1)" value={`${t.pca1 >= 0 ? "+" : ""}${t.pca1.toFixed(3)}`} color={t.pca1 > 1 ? "#00c896" : t.pca1 < -1 ? "#ff5555" : "#555"}>
-            <BarChart data={hist.pca1} label="pca1" color={trendColor} />
-            <p style={{ fontSize: "10px", color: "#333", marginTop: "6px" }}>
-              {t.pca1 > 1 ? "buyers in structural control" : t.pca1 < -1 ? "sellers in structural control" : "no dominant structural direction"}
-            </p>
-          </Panel>
-
-          {/* Momentum */}
-          <Panel label="momentum (pca2)" value={`${t.pca2 >= 0 ? "+" : ""}${t.pca2.toFixed(3)}`} color={t.aligned ? "#00c896" : "#f0c040"}>
-            <BarChart data={hist.pca2} label="pca2" color={momColor} />
-            <p style={{ fontSize: "10px", color: "#333", marginTop: "6px" }}>
-              {t.aligned ? "momentum aligned with trend — signals reliable" : "momentum diverging from trend — reduce conviction"}
-            </p>
-          </Panel>
+          {/* 3D Time Series */}
+          <div style={{ border: "0.5px solid #1a1a1a", borderRadius: "8px", background: "#050505", overflow: "hidden" }}>
+            <div style={{ padding: "10px 16px", borderBottom: "0.5px solid #111" }}>
+              <span style={{ fontSize: "9px", letterSpacing: "0.25em", color: "#333", textTransform: "uppercase" }}>structural history · trend · momentum · vol z-score · drag to rotate</span>
+            </div>
+            <Plot
+              data={[
+                {
+                  type: "scatter3d" as const,
+                  x: hist.pca1.map((_: number, i: number) => i),
+                  y: hist.pca1,
+                  z: Array(hist.pca1.length).fill(0),
+                  mode: "lines" as const,
+                  line: { color: hist.pca1.map((v: number) => v > 1 ? "#00c896" : v < -1 ? "#ff5555" : "#2a4a3a"), width: 3, colorscale: [[0,"#ff5555"],[0.5,"#2a4a3a"],[1,"#00c896"]] as any },
+                  name: "PCA1 Trend",
+                  hovertemplate: "trend: %{y:.3f}<extra></extra>"
+                },
+                {
+                  type: "scatter3d" as const,
+                  x: hist.pca2.map((_: number, i: number) => i),
+                  y: Array(hist.pca2.length).fill(0),
+                  z: hist.pca2,
+                  mode: "lines" as const,
+                  line: { color: "#0084ff", width: 3 },
+                  name: "PCA2 Momentum",
+                  hovertemplate: "momentum: %{z:.3f}<extra></extra>"
+                },
+                {
+                  type: "scatter3d" as const,
+                  x: hist.vol_z.map((_: number, i: number) => i),
+                  y: hist.vol_z.map((v: number) => v * 0.3),
+                  z: hist.vol_z.map((v: number) => v * 0.3),
+                  mode: "lines" as const,
+                  line: { color: hist.vol_z.map((v: number) => v > 1.5 ? "#ff5555" : v > 0.5 ? "#f0c040" : "#444"), width: 2, colorscale: [[0,"#444"],[0.5,"#f0c040"],[1,"#ff5555"]] as any },
+                  name: "Vol Z",
+                  hovertemplate: "vol z: %{y:.3f}<extra></extra>"
+                },
+                {
+                  type: "scatter3d" as const,
+                  x: [hist.pca1.length - 1],
+                  y: [hist.pca1[hist.pca1.length - 1]],
+                  z: [0],
+                  mode: "markers" as const,
+                  marker: { size: 8, color: t.pca1 > 1 ? "#00c896" : t.pca1 < -1 ? "#ff5555" : "#f0c040", line: { color: "#fff", width: 1 } },
+                  name: "Now",
+                  hovertemplate: `trend now: ${t.pca1.toFixed(3)}<extra></extra>`,
+                  showlegend: false
+                }
+              ]}
+              layout={{
+                paper_bgcolor: "rgba(0,0,0,0)",
+                plot_bgcolor: "rgba(0,0,0,0)",
+                margin: { l: 0, r: 0, t: 0, b: 0 },
+                showlegend: true,
+                legend: { font: { family: "JetBrains Mono", size: 9, color: "#444" }, bgcolor: "transparent", x: 0.01, y: 0.99 },
+                scene: {
+                  bgcolor: "#050505",
+                  xaxis: { title: { text: "Time", font: { family: "JetBrains Mono", size: 9, color: "#333" } }, gridcolor: "#141414", tickfont: { family: "JetBrains Mono", size: 8, color: "#333" }, showticklabels: false },
+                  yaxis: { title: { text: "Trend (PCA1)", font: { family: "JetBrains Mono", size: 9, color: "#00c896" } }, gridcolor: "#141414", tickfont: { family: "JetBrains Mono", size: 8, color: "#444" }, zerolinecolor: "#1e1e1e" },
+                  zaxis: { title: { text: "Momentum (PCA2)", font: { family: "JetBrains Mono", size: 9, color: "#0084ff" } }, gridcolor: "#141414", tickfont: { family: "JetBrains Mono", size: 8, color: "#444" }, zerolinecolor: "#1e1e1e" },
+                  camera: { eye: { x: 2.0, y: 0.8, z: 0.8 } }
+                },
+                dragmode: "orbit"
+              } as any}
+              config={{ displayModeBar: false, responsive: true, scrollZoom: true }}
+              style={{ width: "100%", height: "400px" }}
+              useResizeHandler
+            />
+          </div>
 
           {/* Entropy */}
-          <Panel label={`entropy — ${e.status}`} value={`${e.rho.toFixed(3)}× threshold`} color={ec}>
+          <div style={{ border: "0.5px solid #1a1a1a", borderRadius: "6px", padding: "14px 16px", background: "#0a0a0a" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+              <span style={{ fontSize: "9px", letterSpacing: "0.25em", color: "#333", textTransform: "uppercase" }}>entropy — {e.status}</span>
+              <span style={{ fontSize: "12px", fontFamily: "JetBrains Mono, monospace", color: ENT_COLOR[e.status] || "#666", fontWeight: 500 }}>{e.rho.toFixed(3)}× threshold</span>
+            </div>
             <EntropyLineChart entropy={hist.entropy} threshold={hist.threshold} />
             <div style={{ display: "flex", gap: "20px", marginTop: "8px" }}>
               <span style={{ fontSize: "10px", color: "#333" }}>current {e.entropy.toFixed(5)}</span>
@@ -286,16 +344,9 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
                 {e.trend === "rising" ? "↑ rising into close" : "↓ falling into close"}
               </span>
             </div>
-          </Panel>
+          </div>
 
-          {/* Volatility */}
-          <Panel label="volatility z-score" value={`${t.vol_z >= 0 ? "+" : ""}${t.vol_z.toFixed(3)}`} color={t.vol_z > 1.5 ? "#ff5555" : t.vol_z > 0.5 ? "#f0c040" : "#555"}>
-            <BarChart data={hist.vol_z} label="vol_z" color={volColor} />
-            <p style={{ fontSize: "10px", color: "#333", marginTop: "6px" }}>
-              {t.vol_z > 1.5 ? "vol significantly elevated — widen stops, reduce size" : t.vol_z > 0.5 ? "vol slightly above average — normal caution" : t.vol_z < -0.5 ? "vol compressed — expansion likely incoming" : "vol near historical average"}
-            </p>
-          </Panel>
-        </>
+                </>
       ) : (
         <p style={{ fontSize: "12px", color: "#444", padding: "20px 0" }}>chart data unavailable</p>
       )}
