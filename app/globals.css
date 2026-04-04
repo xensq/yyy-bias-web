@@ -4,16 +4,16 @@
 @tailwind utilities;
 
 :root {
-  --accent: #00c896;
-  --accent-dim: rgba(0,200,150,0.08);
-  --bg: #080810;
-  --surface: #0c0c16;
+  --accent: #dc2626;
+  --accent-dim: rgba(220,38,38,0.06);
+  --bg: #09050a;
+  --surface: rgba(9,5,10,0.0);
   --border: #1e1e2e;
   --border-light: #252535;
   --text: #e8e8f0;
   --dim: #6666888;
   --muted: #44445a;
-  --bull: #00c896;
+  --bull: #22c55e;
   --bear: #ff4466;
   --warn: #e8b84b;
 }
@@ -26,7 +26,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  background: var(--bg);
+  background: #09050a;
   color: var(--text);
   font-family: "JetBrains Mono", monospace;
   font-size: 12px;

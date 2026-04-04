@@ -107,13 +107,13 @@ export default function Dashboard() {
   const sideW = collapsed ? 56 : 180
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "var(--bg)", position: "relative" }}>
+    <div style={{ display: "flex", minHeight: "100vh", background: "transparent", position: "relative" }}>
       <GreekBackground />
 
       {/* Sidebar */}
       <div style={{
         position: "fixed", left: 0, top: 0, bottom: 0, width: `${sideW}px`,
-        background: "var(--surface)", borderRight: "1px solid var(--border)",
+        background: "rgba(9,5,10,0.88)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", borderRight: "1px solid rgba(220,38,38,0.12)",
         display: "flex", flexDirection: "column", zIndex: 20,
         transition: "width 0.2s ease",
       }}>

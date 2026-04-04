@@ -171,7 +171,7 @@ export default function Landing() {
         <div style={{ marginBottom: "48px", minHeight: "24px" }}>
           <span style={{ fontSize: "13px", color: "rgba(220,38,38,0.7)", fontFamily: "JetBrains Mono", letterSpacing: "0.02em" }}>
             {typed}
-            {(phase < 2) && <span style={{ opacity: showCursor ? 1 : 0, color: "var(--accent)" }}>|</span>}
+            {(phase < 2) && <span style={{ opacity: showCursor ? 1 : 0, color: "#dc2626" }}>|</span>}
           </span>
         </div>
 
