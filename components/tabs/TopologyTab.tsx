@@ -8,7 +8,7 @@ interface TopoProps {
   entropy: { entropy: number; threshold: number; rho: number; status: string; size_factor: number; trend: string; error: string | null }
 }
 
-interface HistData { pca1: number[]; pca2: number[]; vol_z: number[]; entropy: number[]; threshold: number[]; n: number; error?: string | null }
+interface HistData { pca1: number[]; pca2: number[]; vol_z: number[]; entropy: number[]; threshold: number[]; n: number }
 
 const REGIME_COLOR: Record<string, string> = {
   "BULL TREND": "#00c896", "BEAR TREND": "#ff5555",
@@ -22,7 +22,7 @@ function BarChart({ data, label, color, threshold }: { data: number[]; label: st
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas || !data.length) return
-    const ctx = canvas.getContext("2d"); if (!ctx) return
+    const ctx = canvas.getContext("2d")!
     const W = canvas.width, H = canvas.height
     ctx.clearRect(0, 0, W, H)
 
@@ -80,7 +80,7 @@ function EntropyLineChart({ entropy, threshold }: { entropy: number[]; threshold
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas || !entropy.length) return
-    const ctx = canvas.getContext("2d"); if (!ctx) return
+    const ctx = canvas.getContext("2d")!
     const W = canvas.width, H = canvas.height
     ctx.clearRect(0, 0, W, H)
 
