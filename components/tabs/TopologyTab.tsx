@@ -59,30 +59,47 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
       {!loading && hist && !hist.error && (
         <div style={{ background: "var(--surface)", border: "1px solid var(--border)", overflow: "hidden" }}>
           <div style={{ padding: "10px 20px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: "9px", letterSpacing: "0.2em", color: "var(--muted)", textTransform: "uppercase" }}>phase space · pca1 × pca2 × vol z · drag to rotate</span>
+            <span style={{ fontSize: "9px", letterSpacing: "0.2em", color: "var(--muted)", textTransform: "uppercase" }}>structural history · trend · momentum · vol z-score · drag to rotate</span>
             <span style={{ fontSize: "9px", color: "var(--muted)" }}>{hist.n} sessions</span>
           </div>
           <Plot
             data={[
               {
                 type: "scatter3d" as const,
-                x: hist.pca1.slice(0, -1), y: hist.pca2.slice(0, -1), z: hist.vol_z.slice(0, -1),
-                mode: "markers" as const,
-                marker: {
-                  size: 3, opacity: 0.5,
-                  color: hist.entropy.slice(0, -1).map((v: number, i: number) => v / (hist.threshold[i] || 1)),
-                  colorscale: [[0, "#00c896"], [0.6, "#e8b84b"], [1.0, "#ff4466"]] as any,
-                  cmin: 0, cmax: 1.3, showscale: false,
-                },
-                hoverinfo: "skip" as const
+                x: Array.from({ length: hist.pca1.length }, (_, i) => i),
+                y: hist.pca1,
+                z: hist.pca2,
+                mode: "lines" as const,
+                line: { color: "#00c896", width: 2 },
+                name: "PCA1 Trend",
               },
               {
                 type: "scatter3d" as const,
-                x: [t.pca1], y: [t.pca2], z: [t.vol_z],
+                x: Array.from({ length: hist.vol_z.length }, (_, i) => i),
+                y: hist.vol_z,
+                z: hist.pca2,
+                mode: "lines" as const,
+                line: { color: "#4488ff", width: 2 },
+                name: "PCA2 Momentum",
+              },
+              {
+                type: "scatter3d" as const,
+                x: Array.from({ length: hist.vol_z.length }, (_, i) => i),
+                y: hist.vol_z,
+                z: hist.pca1,
+                mode: "lines" as const,
+                line: { color: "#e8b84b", width: 2 },
+                name: "Vol Z",
+              },
+              {
+                type: "scatter3d" as const,
+                x: [hist.pca1.length - 1],
+                y: [t.pca1],
+                z: [t.pca2],
                 mode: "markers" as const,
-                marker: { size: 10, color: "#f97316", line: { color: "#fff", width: 1 } },
-                hovertemplate: `trend: ${t.pca1.toFixed(3)}<br>momentum: ${t.pca2.toFixed(3)}<br>vol z: ${t.vol_z.toFixed(3)}<extra>now</extra>`,
-                showlegend: false
+                marker: { size: 8, color: "#f97316", line: { color: "#fff", width: 1 } },
+                name: "now",
+                showlegend: false,
               }
             ]}
             layout={{
@@ -90,9 +107,9 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
               margin: { l: 0, r: 0, t: 0, b: 0 },
               scene: {
                 bgcolor: "rgba(0,0,0,0)",
-                xaxis: { title: { text: "PCA1", font: { family: "JetBrains Mono", size: 9, color: "#44445a" } }, gridcolor: "#1e1e2e", tickfont: { family: "JetBrains Mono", size: 8, color: "#44445a" } },
-                yaxis: { title: { text: "PCA2", font: { family: "JetBrains Mono", size: 9, color: "#44445a" } }, gridcolor: "#1e1e2e", tickfont: { family: "JetBrains Mono", size: 8, color: "#44445a" } },
-                zaxis: { title: { text: "Vol Z", font: { family: "JetBrains Mono", size: 9, color: "#44445a" } }, gridcolor: "#1e1e2e", tickfont: { family: "JetBrains Mono", size: 8, color: "#44445a" } },
+                xaxis: { title: { text: "Time", font: { family: "JetBrains Mono", size: 9, color: "#44445a" } }, gridcolor: "#1e1e2e", tickfont: { family: "JetBrains Mono", size: 8, color: "#44445a" } },
+                yaxis: { title: { text: "Trend (PCA1)", font: { family: "JetBrains Mono", size: 9, color: "#44445a" } }, gridcolor: "#1e1e2e", tickfont: { family: "JetBrains Mono", size: 8, color: "#44445a" } },
+                zaxis: { title: { text: "Momentum (PCA2)", font: { family: "JetBrains Mono", size: 9, color: "#44445a" } }, gridcolor: "#1e1e2e", tickfont: { family: "JetBrains Mono", size: 8, color: "#44445a" } },
                 camera: { eye: { x: 1.6, y: -1.6, z: 1.1 } }
               },
               dragmode: "orbit"
@@ -154,8 +171,8 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
               margin: { l: 0, r: 0, t: 0, b: 0 },
               scene: {
                 bgcolor: "rgba(0,0,0,0)",
-                xaxis: { title: { text: "PCA1", font: { family: "JetBrains Mono", size: 9, color: "#44445a" } }, gridcolor: "#1e1e2e", tickfont: { family: "JetBrains Mono", size: 8, color: "#44445a" } },
-                yaxis: { title: { text: "PCA2", font: { family: "JetBrains Mono", size: 9, color: "#44445a" } }, gridcolor: "#1e1e2e", tickfont: { family: "JetBrains Mono", size: 8, color: "#44445a" } },
+                xaxis: { title: { text: "Time", font: { family: "JetBrains Mono", size: 9, color: "#44445a" } }, gridcolor: "#1e1e2e", tickfont: { family: "JetBrains Mono", size: 8, color: "#44445a" } },
+                yaxis: { title: { text: "Trend (PCA1)", font: { family: "JetBrains Mono", size: 9, color: "#44445a" } }, gridcolor: "#1e1e2e", tickfont: { family: "JetBrains Mono", size: 8, color: "#44445a" } },
                 zaxis: { title: { text: "Entropy", font: { family: "JetBrains Mono", size: 9, color: "#44445a" } }, gridcolor: "#1e1e2e", tickfont: { family: "JetBrains Mono", size: 8, color: "#44445a" } },
                 camera: { eye: { x: 1.6, y: -1.6, z: 1.1 } }
               },
