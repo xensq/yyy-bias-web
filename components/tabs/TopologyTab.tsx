@@ -114,6 +114,60 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
 
 
 
+
+      {/* 3D Entropy Manifold */}
+      {!loading && hist && !hist.error && (
+        <div style={{ background: "rgba(0,0,0,0)", border: "1px solid var(--border)", overflow: "hidden" }}>
+          <div style={{ padding: "10px 20px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between" }}>
+            <span style={{ fontSize: "9px", letterSpacing: "0.2em", color: "var(--muted)", textTransform: "uppercase" }}>entropy manifold · pca1 × pca2 × entropy · drag to rotate</span>
+            <span style={{ fontSize: "9px", color: "var(--muted)" }}>{hist.n} sessions</span>
+          </div>
+          <Plot
+            data={[
+              {
+                type: "scatter3d" as const,
+                x: hist.pca1.slice(0, -1),
+                y: hist.pca2.slice(0, -1),
+                z: hist.entropy.slice(0, -1),
+                mode: "markers" as const,
+                marker: {
+                  size: 3,
+                  opacity: 0.6,
+                  color: hist.entropy.slice(0, -1).map((v: number, i: number) => v / (hist.threshold[i] || 1)),
+                  colorscale: [[0, "#00c896"], [0.6, "#e8b84b"], [1.0, "#ff4466"]] as any,
+                  cmin: 0, cmax: 1.5,
+                  showscale: false,
+                },
+                hoverinfo: "skip" as const,
+              },
+              {
+                type: "scatter3d" as const,
+                x: [t.pca1], y: [t.pca2], z: [e.entropy],
+                mode: "markers" as const,
+                marker: { size: 10, color: "#f97316", line: { color: "#fff", width: 1 } },
+                hovertemplate: `pca1: ${t.pca1.toFixed(3)}<br>pca2: ${t.pca2.toFixed(3)}<br>entropy: ${e.entropy.toFixed(5)}<extra>now</extra>`,
+                showlegend: false,
+              }
+            ]}
+            layout={{
+              paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+              margin: { l: 0, r: 0, t: 0, b: 0 },
+              scene: {
+                bgcolor: "rgba(0,0,0,0)",
+                xaxis: { title: { text: "PCA1", font: { family: "JetBrains Mono", size: 9, color: "#44445a" } }, gridcolor: "#1e1e2e", tickfont: { family: "JetBrains Mono", size: 8, color: "#44445a" } },
+                yaxis: { title: { text: "PCA2", font: { family: "JetBrains Mono", size: 9, color: "#44445a" } }, gridcolor: "#1e1e2e", tickfont: { family: "JetBrains Mono", size: 8, color: "#44445a" } },
+                zaxis: { title: { text: "Entropy", font: { family: "JetBrains Mono", size: 9, color: "#44445a" } }, gridcolor: "#1e1e2e", tickfont: { family: "JetBrains Mono", size: 8, color: "#44445a" } },
+                camera: { eye: { x: 1.6, y: -1.6, z: 1.1 } }
+              },
+              dragmode: "orbit"
+            } as any}
+            config={{ displayModeBar: false, responsive: true, scrollZoom: true }}
+            style={{ width: "100%", height: "420px" }}
+            useResizeHandler
+          />
+        </div>
+      )}
+
       {/* Entropy */}
       <div style={{ background: "var(--surface)", border: "1px solid var(--border)", display: "grid", gridTemplateColumns: "1fr 1fr" }}>
         <div style={{ padding: "20px 24px", borderRight: "1px solid var(--border)" }}>
