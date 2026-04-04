@@ -11,7 +11,10 @@ interface GexProps {
   }
 }
 
-export default function GexTab({ gex: g }: GexProps) {
+export default function GexTab({ gex: initialGex }: GexProps) {
+  const [ticker, setTicker] = useState("SPX")
+  const [g, setG] = useState(initialGex)
+  const [loading, setLoading] = useState(false)
   const [hovered, setHovered] = useState<{ strike: number; call_gex: number; put_gex: number; net: number; x: number; y: number } | null>(null)
 
   useEffect(() => {
@@ -19,10 +22,10 @@ export default function GexTab({ gex: g }: GexProps) {
     setLoading(true)
     fetch(`${API}/gex?ticker=${ticker}`)
       .then(r => r.json())
-      .then(setG)
+      .then(d => setG(d))
       .catch(() => {})
       .finally(() => setLoading(false))
-  }, [ticker])
+  }, [ticker]) // eslint-disable-line
 
   if (g.error) return <div style={{ color: "#ff5555", fontSize: "12px", marginTop: "16px" }}>{g.error}</div>
 
