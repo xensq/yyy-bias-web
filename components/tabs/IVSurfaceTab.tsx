@@ -93,7 +93,7 @@ export default function IVSurfaceTab() {
     plot_bgcolor: "rgba(0,0,0,0)",
     margin: { l: 0, r: 60, t: 10, b: 0 },
     scene: {
-      bgcolor: "#0a0a10",
+      bgcolor: "rgba(0,0,0,0)",
       xaxis: {
         title: { text: "moneyness (K/S)", font: { family: "JetBrains Mono", size: 9, color: "var(--dim)" } },
         gridcolor: "rgba(255,255,255,0.06)", zerolinecolor: "#1e1e1e",
