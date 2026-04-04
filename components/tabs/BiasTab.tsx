@@ -134,8 +134,8 @@ export default function BiasTab({ bias }: Props) {
               <div style={{ height: "1px", background: "var(--border)", position: "relative" }}>
                 <div style={{
                   position: "absolute", top: "-1px", height: "3px", borderRadius: "0",
-                  background: vc, width: `${Math.abs(vote) * 100}%`,
-                  left: vote >= 0 ? "50%" : `${50 - Math.abs(vote) * 50}%`,
+                  background: vc, width: `${Math.min(Math.abs(vote) * 50, 50)}%`,
+                  left: vote >= 0 ? "50%" : `${50 - Math.min(Math.abs(vote) * 50, 50)}%`,
                   transition: "width 0.5s"
                 }} />
                 <div style={{ position: "absolute", top: "-2px", left: "50%", width: "1px", height: "5px", background: "var(--border-light)" }} />

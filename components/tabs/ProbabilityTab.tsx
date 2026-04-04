@@ -107,13 +107,15 @@ export default function ProbabilityTab() {
                     x: [1, 2, 3, 4, 5],
                     y: data.price_grid,
                     colorscale: [
-                      [0, "#050510"],
-                      [0.15, "#0a1628"],
-                      [0.35, "#0d3b6e"],
-                      [0.55, "#1a6b3c"],
-                      [0.72, "#c8a020"],
-                      [0.88, "#e05020"],
-                      [1.0, "#ff2020"]
+                      [0.0,  "#050510"],
+                      [0.10, "#0a1a40"],
+                      [0.25, "#0d4080"],
+                      [0.45, "#0080a0"],
+                      [0.60, "#00a86b"],
+                      [0.75, "#80c000"],
+                      [0.87, "#f0a000"],
+                      [0.95, "#f04000"],
+                      [1.0,  "#ff1020"]
                     ] as any,
                     showscale: true,
                     colorbar: {
@@ -121,6 +123,7 @@ export default function ProbabilityTab() {
                       tickfont: { family: "JetBrains Mono", size: 8, color: "#444" },
                       title: { text: "density", font: { family: "JetBrains Mono", size: 8, color: "#444" }, side: "right" as const },
                     },
+                    zsmooth: "best" as const,
                     hovertemplate: "day %{x}<br>price %{y:,.0f}<br>density %{z:.4f}<extra></extra>",
                   },
                   // Spot line

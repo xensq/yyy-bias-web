@@ -111,6 +111,52 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
         </div>
       )}
 
+      {/* Entropy history chart */}
+      {!loading && hist && !hist.error && hist.entropy.length > 1 && (
+        <div style={{ background: "var(--surface)", border: "1px solid var(--border)", overflow: "hidden" }}>
+          <div style={{ padding: "10px 20px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: "9px", letterSpacing: "0.2em", color: "var(--muted)", textTransform: "uppercase" }}>entropy history</span>
+            <span style={{ fontSize: "9px", color: "var(--muted)" }}>green = below threshold · red = above</span>
+          </div>
+          <div style={{ padding: "0 0 4px" }}>
+            <svg width="100%" height="80" viewBox={`0 0 ${hist.entropy.length} 80`} preserveAspectRatio="none" style={{ display: "block" }}>
+              {/* Threshold area */}
+              <defs>
+                <linearGradient id="entGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="rgba(232,184,75,0.08)" />
+                  <stop offset="100%" stopColor="rgba(232,184,75,0)" />
+                </linearGradient>
+              </defs>
+              {/* Threshold line */}
+              {hist.threshold.map((v: number, i: number) => {
+                if (i === 0) return null
+                const maxV = Math.max(...hist.entropy, ...hist.threshold) * 1.1
+                const y1 = 80 - (hist.threshold[i-1] / maxV) * 76
+                const y2 = 80 - (v / maxV) * 76
+                return <line key={i} x1={i-1} y1={y1} x2={i} y2={y2} stroke="rgba(232,184,75,0.4)" strokeWidth="0.3" strokeDasharray="2,2" />
+              })}
+              {/* Entropy line colored by threshold crossing */}
+              {hist.entropy.map((v: number, i: number) => {
+                if (i === 0) return null
+                const maxV = Math.max(...hist.entropy, ...hist.threshold) * 1.1
+                const y1 = 80 - (hist.entropy[i-1] / maxV) * 76
+                const y2 = 80 - (v / maxV) * 76
+                const above = v > hist.threshold[i]
+                return <line key={i} x1={i-1} y1={y1} x2={i} y2={y2} stroke={above ? "rgba(255,68,102,0.8)" : "rgba(0,200,150,0.7)"} strokeWidth="0.8" />
+              })}
+              {/* Current dot */}
+              {(() => {
+                const last = hist.entropy.length - 1
+                const maxV = Math.max(...hist.entropy, ...hist.threshold) * 1.1
+                const cy = 80 - (hist.entropy[last] / maxV) * 76
+                const above = hist.entropy[last] > hist.threshold[last]
+                return <circle cx={last} cy={cy} r="2" fill={above ? "var(--bear)" : "var(--bull)"} />
+              })()}
+            </svg>
+          </div>
+        </div>
+      )}
+
       {/* Entropy */}
       <div style={{ background: "var(--surface)", border: "1px solid var(--border)", display: "grid", gridTemplateColumns: "1fr 1fr" }}>
         <div style={{ padding: "20px 24px", borderRight: "1px solid var(--border)" }}>
