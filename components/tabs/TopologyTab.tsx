@@ -111,49 +111,123 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
         </div>
       )}
 
-      {/* Entropy history chart */}
+      {/* 3D Structural History */}
+      {!loading && hist && !hist.error && (
+        <div style={{ background: "var(--surface)", border: "1px solid var(--border)", overflow: "hidden" }}>
+          <div style={{ padding: "10px 20px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: "9px", letterSpacing: "0.2em", color: "var(--muted)", textTransform: "uppercase" }}>structural history · trend · momentum · vol z · drag to rotate</span>
+            <span style={{ fontSize: "9px", color: "var(--muted)" }}>{hist.n} sessions</span>
+          </div>
+          <Plot
+            data={[
+              {
+                type: "scatter3d" as const,
+                x: hist.pca1.map((_: number, i: number) => i),
+                y: hist.pca1,
+                z: Array(hist.pca1.length).fill(0),
+                mode: "lines" as const,
+                line: { color: "rgba(0,200,150,0.8)", width: 3 },
+                name: "PCA1 Trend",
+                hovertemplate: "trend: %{y:.3f}<extra></extra>"
+              },
+              {
+                type: "scatter3d" as const,
+                x: hist.pca2.map((_: number, i: number) => i),
+                y: Array(hist.pca2.length).fill(0),
+                z: hist.pca2,
+                mode: "lines" as const,
+                line: { color: "rgba(68,136,255,0.8)", width: 3 },
+                name: "PCA2 Momentum",
+                hovertemplate: "momentum: %{z:.3f}<extra></extra>"
+              },
+              {
+                type: "scatter3d" as const,
+                x: hist.vol_z.map((_: number, i: number) => i),
+                y: hist.vol_z.map((v: number) => v * 0.3),
+                z: hist.vol_z.map((v: number) => v * 0.3),
+                mode: "lines" as const,
+                line: { color: "rgba(232,184,75,0.7)", width: 2 },
+                name: "Vol Z",
+                hovertemplate: "vol z: %{y:.3f}<extra></extra>"
+              },
+              {
+                type: "scatter3d" as const,
+                x: [hist.pca1.length - 1],
+                y: [hist.pca1[hist.pca1.length - 1]],
+                z: [0],
+                mode: "markers" as const,
+                marker: { size: 8, color: t.pca1 > 1 ? "#00c896" : t.pca1 < -1 ? "#ff4466" : "#e8b84b", line: { color: "#fff", width: 1 } },
+                showlegend: false,
+                hovertemplate: `trend now: ${t.pca1.toFixed(3)}<extra></extra>`
+              }
+            ]}
+            layout={{
+              paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+              margin: { l: 0, r: 0, t: 0, b: 0 },
+              showlegend: true,
+              legend: { font: { family: "JetBrains Mono", size: 9, color: "#44445a" }, bgcolor: "transparent", x: 0.01, y: 0.99 },
+              scene: {
+                bgcolor: "#08080f",
+                xaxis: { title: { text: "Time", font: { family: "JetBrains Mono", size: 9, color: "#44445a" } }, gridcolor: "#1e1e2e", tickfont: { family: "JetBrains Mono", size: 8, color: "#44445a" }, showticklabels: false },
+                yaxis: { title: { text: "Trend (PCA1)", font: { family: "JetBrains Mono", size: 9, color: "rgba(0,200,150,0.7)" } }, gridcolor: "#1e1e2e", tickfont: { family: "JetBrains Mono", size: 8, color: "#44445a" }, zerolinecolor: "#1e1e2e" },
+                zaxis: { title: { text: "Momentum (PCA2)", font: { family: "JetBrains Mono", size: 9, color: "rgba(68,136,255,0.7)" } }, gridcolor: "#1e1e2e", tickfont: { family: "JetBrains Mono", size: 8, color: "#44445a" }, zerolinecolor: "#1e1e2e" },
+                camera: { eye: { x: 2.0, y: 0.8, z: 0.8 } }
+              },
+              dragmode: "orbit"
+            } as any}
+            config={{ displayModeBar: false, responsive: true, scrollZoom: true }}
+            style={{ width: "100%", height: "380px" }}
+            useResizeHandler
+          />
+        </div>
+      )}
+
+      {/* Entropy Plotly chart */}
       {!loading && hist && !hist.error && hist.entropy.length > 1 && (
         <div style={{ background: "var(--surface)", border: "1px solid var(--border)", overflow: "hidden" }}>
           <div style={{ padding: "10px 20px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: "9px", letterSpacing: "0.2em", color: "var(--muted)", textTransform: "uppercase" }}>entropy history</span>
-            <span style={{ fontSize: "9px", color: "var(--muted)" }}>green = below threshold · red = above</span>
+            <span style={{ fontSize: "9px", letterSpacing: "0.2em", color: "var(--muted)", textTransform: "uppercase" }}>entropy history · green = clean · red = elevated</span>
+            <span style={{ fontSize: "9px", color: ec }}>{e.status} · {e.rho.toFixed(3)}× threshold</span>
           </div>
-          <div style={{ padding: "0 0 4px" }}>
-            <svg width="100%" height="80" viewBox={`0 0 ${hist.entropy.length} 80`} preserveAspectRatio="none" style={{ display: "block" }}>
-              {/* Threshold area */}
-              <defs>
-                <linearGradient id="entGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="rgba(232,184,75,0.08)" />
-                  <stop offset="100%" stopColor="rgba(232,184,75,0)" />
-                </linearGradient>
-              </defs>
-              {/* Threshold line */}
-              {hist.threshold.map((v: number, i: number) => {
-                if (i === 0) return null
-                const maxV = Math.max(...hist.entropy, ...hist.threshold) * 1.1
-                const y1 = 80 - (hist.threshold[i-1] / maxV) * 76
-                const y2 = 80 - (v / maxV) * 76
-                return <line key={i} x1={i-1} y1={y1} x2={i} y2={y2} stroke="rgba(232,184,75,0.4)" strokeWidth="0.3" strokeDasharray="2,2" />
-              })}
-              {/* Entropy line colored by threshold crossing */}
-              {hist.entropy.map((v: number, i: number) => {
-                if (i === 0) return null
-                const maxV = Math.max(...hist.entropy, ...hist.threshold) * 1.1
-                const y1 = 80 - (hist.entropy[i-1] / maxV) * 76
-                const y2 = 80 - (v / maxV) * 76
-                const above = v > hist.threshold[i]
-                return <line key={i} x1={i-1} y1={y1} x2={i} y2={y2} stroke={above ? "rgba(255,68,102,0.8)" : "rgba(0,200,150,0.7)"} strokeWidth="0.8" />
-              })}
-              {/* Current dot */}
-              {(() => {
-                const last = hist.entropy.length - 1
-                const maxV = Math.max(...hist.entropy, ...hist.threshold) * 1.1
-                const cy = 80 - (hist.entropy[last] / maxV) * 76
-                const above = hist.entropy[last] > hist.threshold[last]
-                return <circle cx={last} cy={cy} r="2" fill={above ? "var(--bear)" : "var(--bull)"} />
-              })()}
-            </svg>
-          </div>
+          <Plot
+            data={[
+              {
+                type: "scatter" as const,
+                x: hist.entropy.map((_: number, i: number) => i),
+                y: hist.threshold,
+                mode: "lines" as const,
+                line: { color: "rgba(232,184,75,0.4)", width: 1, dash: "dot" as const },
+                name: "threshold",
+                hoverinfo: "skip" as const,
+                fill: "tonexty" as const,
+                fillcolor: "rgba(232,184,75,0.03)",
+              },
+              {
+                type: "scatter" as const,
+                x: hist.entropy.map((_: number, i: number) => i),
+                y: hist.entropy,
+                mode: "lines" as const,
+                line: { color: "rgba(0,200,150,0.8)", width: 1.5 },
+                name: "entropy",
+                hovertemplate: "entropy: %{y:.5f}<extra></extra>",
+              },
+            ]}
+            layout={{
+              paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "#08080f",
+              margin: { l: 50, r: 20, t: 8, b: 30 },
+              xaxis: { visible: false, gridcolor: "#1e1e2e" },
+              yaxis: { tickfont: { family: "JetBrains Mono", size: 8, color: "#44445a" }, gridcolor: "#1e1e2e", zeroline: false },
+              legend: { font: { family: "JetBrains Mono", size: 9, color: "#44445a" }, bgcolor: "transparent", x: 0.01, y: 0.99 },
+              shapes: [{
+                type: "line", x0: hist.entropy.length - 1, x1: hist.entropy.length - 1,
+                y0: 0, y1: hist.entropy[hist.entropy.length - 1],
+                line: { color: e.status === "CRITICAL" ? "rgba(255,68,102,0.6)" : e.status === "ELEVATED" ? "rgba(232,184,75,0.6)" : "rgba(0,200,150,0.6)", width: 1, dash: "dot" }
+              }]
+            } as any}
+            config={{ displayModeBar: false, responsive: true }}
+            style={{ width: "100%", height: "120px" }}
+            useResizeHandler
+          />
         </div>
       )}
 
