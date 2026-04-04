@@ -137,7 +137,7 @@ export default function Landing() {
           <span style={{ fontSize: "8px", letterSpacing: "0.2em", color: "rgba(220,38,38,0.4)", fontFamily: "JetBrains Mono", textTransform: "uppercase" }}>research</span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-          <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#dc2626", boxShadow: "0 0 8px #00c896", animation: "pulse 2s infinite", background: "#dc2626", boxShadow: "0 0 8px rgba(220,38,38,0.8)" }} />
+          <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#dc2626", boxShadow: "0 0 8px rgba(220,38,38,0.8)", animation: "pulse 2s infinite" }} />
           <span style={{ fontSize: "8px", letterSpacing: "0.2em", color: "rgba(220,38,38,0.6)", fontFamily: "JetBrains Mono", textTransform: "uppercase" }}>live</span>
         </div>
       </div>
