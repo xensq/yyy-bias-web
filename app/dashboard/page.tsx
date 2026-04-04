@@ -65,7 +65,7 @@ function GreekBackground() {
         if (p.x < -20) p.x = canvas.width + 20
         if (p.x > canvas.width + 20) p.x = -20
         ctx.font = `${p.size}px JetBrains Mono, monospace`
-        ctx.fillStyle = `rgba(0,200,150,${p.opacity})`
+        ctx.fillStyle = `rgba(220,38,38,${p.opacity})`
         ctx.fillText(p.symbol, p.x, p.y)
       })
       rafRef.current = requestAnimationFrame(draw)

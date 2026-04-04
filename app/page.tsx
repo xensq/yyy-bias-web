@@ -133,12 +133,12 @@ export default function Landing() {
       {/* Top bar */}
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, padding: "20px 40px", display: "flex", justifyContent: "space-between", alignItems: "center", zIndex: 10, borderBottom: "1px solid rgba(220,38,38,0.08)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span style={{ fontSize: "13px", fontWeight: 700, letterSpacing: "0.4em", color: "var(--accent)", fontFamily: "JetBrains Mono" }}>YYY</span>
-          <span style={{ fontSize: "8px", letterSpacing: "0.2em", color: "rgba(220,38,38,0.3)", fontFamily: "JetBrains Mono", textTransform: "uppercase" }}>research</span>
+          <span style={{ fontSize: "13px", fontWeight: 700, letterSpacing: "0.4em", color: "#dc2626", fontFamily: "JetBrains Mono" }}>YYY</span>
+          <span style={{ fontSize: "8px", letterSpacing: "0.2em", color: "rgba(220,38,38,0.4)", fontFamily: "JetBrains Mono", textTransform: "uppercase" }}>research</span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-          <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#dc2626", boxShadow: "0 0 8px #00c896", animation: "pulse 2s infinite" }} />
-          <span style={{ fontSize: "8px", letterSpacing: "0.2em", color: "rgba(220,38,38,0.4)", fontFamily: "JetBrains Mono", textTransform: "uppercase" }}>live</span>
+          <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#dc2626", boxShadow: "0 0 8px #00c896", animation: "pulse 2s infinite", background: "#dc2626", boxShadow: "0 0 8px rgba(220,38,38,0.8)" }} />
+          <span style={{ fontSize: "8px", letterSpacing: "0.2em", color: "rgba(220,38,38,0.6)", fontFamily: "JetBrains Mono", textTransform: "uppercase" }}>live</span>
         </div>
       </div>
 
@@ -147,7 +147,7 @@ export default function Landing() {
 
         {/* Eyebrow */}
         <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
-          <div style={{ width: "32px", height: "1px", background: "rgba(220,38,38,0.5)" }} />
+          <div style={{ width: "32px", height: "1px", background: "rgba(220,38,38,0.6)" }} />
           <span style={{ fontSize: "9px", letterSpacing: "0.4em", color: "rgba(220,38,38,0.5)", fontFamily: "JetBrains Mono", textTransform: "uppercase" }}>
             analysis software
           </span>
@@ -184,7 +184,7 @@ export default function Landing() {
           ].map(({ label, value }) => (
             <div key={label}>
               <p style={{ fontSize: "20px", fontWeight: 600, color: "var(--text)", fontFamily: "JetBrains Mono", marginBottom: "4px" }}>{value}</p>
-              <p style={{ fontSize: "9px", color: "rgba(220,38,38,0.4)", letterSpacing: "0.2em", textTransform: "uppercase", fontFamily: "JetBrains Mono" }}>{label}</p>
+              <p style={{ fontSize: "9px", color: "rgba(220,38,38,0.5)", letterSpacing: "0.2em", textTransform: "uppercase", fontFamily: "JetBrains Mono" }}>{label}</p>
             </div>
           ))}
         </div>
@@ -197,7 +197,7 @@ export default function Landing() {
               padding: "14px 36px",
               background: "transparent",
               border: "1px solid rgba(220,38,38,0.5)",
-              color: "var(--accent)",
+              color: "#dc2626",
               fontSize: "10px",
               letterSpacing: "0.25em",
               textTransform: "uppercase",
@@ -223,7 +223,7 @@ export default function Landing() {
 
       {/* Bottom right */}
       <div style={{ position: "absolute", bottom: "28px", right: "40px", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "6px", zIndex: 10 }}>
-        <span style={{ fontSize: "8px", color: "rgba(220,38,38,0.2)", fontFamily: "JetBrains Mono", letterSpacing: "0.15em" }}>not financial advice</span>
+        <span style={{ fontSize: "8px", color: "rgba(220,38,38,0.3)", fontFamily: "JetBrains Mono", letterSpacing: "0.15em" }}>not financial advice</span>
       </div>
 
       {/* Corner marks */}
