@@ -1,5 +1,5 @@
 "use client"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { StrikeData } from "@/lib/api"
 
 interface GexProps {
@@ -12,6 +12,8 @@ interface GexProps {
 }
 
 export default function GexTab({ gex: g }: GexProps) {
+  const [hovered, setHovered] = useState<{ strike: number; call_gex: number; put_gex: number; net: number; x: number; y: number } | null>(null)
+
   if (g.error) return <div style={{ color: "#ff5555", fontSize: "12px", marginTop: "16px" }}>{g.error}</div>
 
   const strikes = useMemo(() => {
@@ -97,27 +99,74 @@ export default function GexTab({ gex: g }: GexProps) {
               const callW = toX(s.call_gex)
               const putW  = toX(Math.abs(s.put_gex))
               const isSpot = Math.abs(s.strike - g.spot) < 5
+              const net = s.call_gex + s.put_gex
+              const isHovered = hovered?.strike === s.strike
               return (
-                <g key={s.strike}>
+                <g key={s.strike}
+                  style={{ cursor: "crosshair" }}
+                  onMouseEnter={e => {
+                    const rect = (e.currentTarget.closest("svg") as SVGSVGElement).getBoundingClientRect()
+                    setHovered({ strike: s.strike, call_gex: s.call_gex, put_gex: s.put_gex, net, x: e.clientX - rect.left, y: y })
+                  }}
+                  onMouseLeave={() => setHovered(null)}
+                >
+                  {/* hover highlight row */}
+                  <rect x={Y_LABEL_W} y={y - 1} width={CHART_W} height={BAR_HEIGHT + 2}
+                    fill={isHovered ? "rgba(255,255,255,0.04)" : "transparent"} rx="2" />
                   {/* strike label */}
                   <text x={Y_LABEL_W - 6} y={y + BAR_HEIGHT/2 + 4} textAnchor="end" fontSize="9"
                     fontFamily="JetBrains Mono, monospace"
-                    fill={isSpot ? "var(--text)" : "var(--muted)"}>
+                    fill={isSpot ? "var(--text)" : isHovered ? "var(--dim)" : "var(--muted)"}>
                     {s.strike.toLocaleString()}
                   </text>
                   {/* put bar (left) */}
                   {putW > 0.5 && (
                     <rect x={Y_LABEL_W + HALF - putW} y={y} width={putW} height={BAR_HEIGHT}
-                      fill="rgba(255,85,85,0.55)" rx="1" />
+                      fill={isHovered ? "rgba(255,85,85,0.85)" : "rgba(255,85,85,0.55)"} rx="1" />
                   )}
                   {/* call bar (right) */}
                   {callW > 0.5 && (
                     <rect x={Y_LABEL_W + HALF} y={y} width={callW} height={BAR_HEIGHT}
-                      fill="rgba(0,200,150,0.55)" rx="1" />
+                      fill={isHovered ? "rgba(0,200,150,0.85)" : "rgba(0,200,150,0.55)"} rx="1" />
                   )}
                 </g>
               )
             })}
+
+            {/* Tooltip */}
+            {hovered && (
+              <g>
+                <rect
+                  x={hovered.x > HALF ? hovered.x - 160 : hovered.x + 12}
+                  y={Math.min(hovered.y - 10, CHART_H - 90)}
+                  width={148} height={82} rx="4"
+                  fill="#0f0f1a" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5"
+                />
+                <text fontFamily="JetBrains Mono, monospace" fontSize="9">
+                  <tspan x={hovered.x > HALF ? hovered.x - 148 : hovered.x + 18}
+                    y={Math.min(hovered.y - 10, CHART_H - 90) + 16}
+                    fill="var(--text)" fontWeight="500">
+                    strike {hovered.strike.toLocaleString()}
+                  </tspan>
+                  <tspan x={hovered.x > HALF ? hovered.x - 148 : hovered.x + 18}
+                    dy="16" fill="rgba(0,200,150,0.9)">
+                    call gex  {hovered.call_gex >= 0 ? "+" : ""}{hovered.call_gex.toFixed(3)}B
+                  </tspan>
+                  <tspan x={hovered.x > HALF ? hovered.x - 148 : hovered.x + 18}
+                    dy="14" fill="rgba(255,85,85,0.9)">
+                    put gex   {hovered.put_gex.toFixed(3)}B
+                  </tspan>
+                  <tspan x={hovered.x > HALF ? hovered.x - 148 : hovered.x + 18}
+                    dy="14" fill={hovered.net >= 0 ? "rgba(0,200,150,0.7)" : "rgba(255,85,85,0.7)"}>
+                    net gex   {hovered.net >= 0 ? "+" : ""}{hovered.net.toFixed(3)}B
+                  </tspan>
+                  <tspan x={hovered.x > HALF ? hovered.x - 148 : hovered.x + 18}
+                    dy="14" fill="var(--muted)">
+                    {hovered.strike > g.spot ? `+${(hovered.strike - g.spot).toFixed(0)} above spot` : `${(hovered.strike - g.spot).toFixed(0)} below spot`}
+                  </tspan>
+                </text>
+              </g>
+            )}
 
             {/* reference lines */}
             {/* Spot — white */}
