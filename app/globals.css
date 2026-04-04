@@ -5,81 +5,71 @@
 
 :root {
   --accent: #00c896;
-  --accent-dim: rgba(0,200,150,0.12);
+  --accent-dim: rgba(0,200,150,0.08);
   --bg: #080810;
-  --surface: #0f0f1a;
-  --border: #2a2a3a;
-  --text: #f0f0f0;
-  --dim: #888899;
-  --muted: #555566;
+  --surface: #0c0c16;
+  --border: #1e1e2e;
+  --border-light: #252535;
+  --text: #e8e8f0;
+  --dim: #6666888;
+  --muted: #44445a;
   --bull: #00c896;
-  --bear: #ff5555;
-  --warn: #f0c040;
+  --bear: #ff4466;
+  --warn: #e8b84b;
 }
 
-[data-theme="crimson"] { --accent: #dc2626; --accent-dim: rgba(220,38,38,0.12); --bull: #22c55e; --bear: #dc2626; }
-[data-theme="gold"]    { --accent: #f0c040; --accent-dim: rgba(240,192,64,0.12); --bull: #f0c040; --bear: #ef4444; }
-[data-theme="blue"]    { --accent: #3b82f6; --accent-dim: rgba(59,130,246,0.12); --bull: #3b82f6; --bear: #ef4444; }
-[data-theme="silver"]  { --accent: #94a3b8; --accent-dim: rgba(148,163,184,0.12); --bull: #94a3b8; --bear: #f87171; }
+[data-theme="crimson"] { --accent: #dc2626; --accent-dim: rgba(220,38,38,0.06); --bull: #22c55e; --bear: #dc2626; }
+[data-theme="gold"]    { --accent: #e8b84b; --accent-dim: rgba(232,184,75,0.06); --bull: #e8b84b; --bear: #ef4444; }
+[data-theme="blue"]    { --accent: #4488ff; --accent-dim: rgba(68,136,255,0.06); --bull: #4488ff; --bear: #ef4444; }
+[data-theme="silver"]  { --accent: #8899bb; --accent-dim: rgba(136,153,187,0.06); --bull: #8899bb; --bear: #f87171; }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
-  line-height: 1.6;
-  background-image:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0,200,150,0.06) 0%, transparent 70%),
-    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(0,100,255,0.03) 0%, transparent 60%);
-  background-attachment: fixed;
-}
-
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: #080810; }
-::-webkit-scrollbar-thumb { background: #2a2a3a; border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: #3a3a4a; }
-
-.tab-active   { color: var(--text); border-bottom: 1px solid var(--accent) !important; color: var(--accent) !important; }
-.tab-inactive { color: #444455; border-bottom: 1px solid transparent; }
-.tab-inactive:hover { color: #888899; }
-
-.cell-strong-bull { background: rgba(0,200,150,0.15); color: #00c896; }
-.cell-mild-bull   { background: rgba(0,200,150,0.07); color: #00a878; }
-.cell-strong-bear { background: rgba(255,85,85,0.15);  color: #ff5555; }
-.cell-mild-bear   { background: rgba(255,85,85,0.07);  color: #cc4444; }
-.cell-neutral     { background: transparent; color: #555566; }
-.cell-empty       { background: transparent; color: #333344; }
-
-.glass {
-  background: rgba(255,255,255,0.03);
-  border: 0.5px solid rgba(255,255,255,0.07);
-  border-radius: 10px;
-  backdrop-filter: blur(4px);
-}
-
-.glass:hover {
-  border-color: rgba(255,255,255,0.11);
-}
-
-/* readable description text everywhere */
-p, span {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
-/* glow pulse for live indicator */
+::-webkit-scrollbar { width: 3px; height: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); }
+
+.glass {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0;
+}
+
+.glass:hover { border-color: var(--border-light); }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 16px;
+}
+
+.label {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.value {
+  font-size: 13px;
+  color: var(--text);
+  font-weight: 500;
+}
+
 @keyframes pulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
+  50% { opacity: 0.2; }
 }
 
-@keyframes glow {
-  0%, 100% { box-shadow: 0 0 4px rgba(0,200,150,0.4); }
-  50% { box-shadow: 0 0 12px rgba(0,200,150,0.8); }
-}
-
-/* nav active glow */
-nav button[style*="var(--accent)"] {
-  text-shadow: 0 0 12px rgba(0,200,150,0.5);
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }

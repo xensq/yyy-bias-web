@@ -99,7 +99,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "24px" }}>
+      <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "24px 32px" }}>
         {loading && (
           <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "var(--dim)", fontSize: "12px", marginTop: "48px" }}>
             <div style={{ width: "6px", height: "6px", background: "var(--accent)", borderRadius: "50%" }} />

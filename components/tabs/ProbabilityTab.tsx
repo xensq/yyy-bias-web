@@ -103,7 +103,7 @@ export default function ProbabilityTab() {
                 data={[
                   {
                     type: "heatmap" as const,
-                    z: data.heatmap,
+                    z: data.price_grid.map((_, pi) => data.heatmap.map((day: number[]) => day[pi])),
                     x: [1, 2, 3, 4, 5],
                     y: data.price_grid,
                     colorscale: [
