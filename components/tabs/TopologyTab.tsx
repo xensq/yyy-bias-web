@@ -184,19 +184,35 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
     <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
 
       {/* status bar */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "10px" }}>
-        {[
-          { label: "regime", value: t.regime, color: rc },
-          { label: "pca1 trend", value: `${t.pca1 >= 0 ? "+" : ""}${t.pca1.toFixed(3)}`, color: t.pca1 > 1 ? "#00c896" : t.pca1 < -1 ? "#ff5555" : "#666" },
-          { label: "pca2 momentum", value: `${t.pca2 >= 0 ? "+" : ""}${t.pca2.toFixed(3)}`, color: t.aligned ? "#00c896" : "#f0c040" },
-          { label: "entropy", value: `${e.rho.toFixed(3)}×`, color: ec },
-          { label: "vol z-score", value: `${t.vol_z >= 0 ? "+" : ""}${t.vol_z.toFixed(3)}`, color: t.vol_z > 1.5 ? "#ff5555" : t.vol_z > 0.5 ? "#f0c040" : "#555" },
-        ].map(({ label, value, color }) => (
-          <div key={label} style={{ border: "0.5px solid #1a1a1a", borderRadius: "6px", padding: "12px 14px", background: "#0a0a0a" }}>
-            <p style={{ fontSize: "9px", letterSpacing: "0.2em", color: "#333", textTransform: "uppercase", marginBottom: "6px" }}>{label}</p>
-            <p style={{ fontSize: "12px", fontFamily: "JetBrains Mono, monospace", color, fontWeight: 500 }}>{value}</p>
-          </div>
-        ))}
+      <div style={{ border: "0.5px solid #1a1a1a", borderRadius: "8px", background: "#0a0a0a", padding: "18px 20px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "0", borderBottom: "0.5px solid #141414", paddingBottom: "14px", marginBottom: "14px" }}>
+          {[
+            { label: "regime", value: t.regime, color: rc },
+            { label: "pca1 trend", value: `${t.pca1 >= 0 ? "+" : ""}${t.pca1.toFixed(3)}`, color: t.pca1 > 1 ? "#00c896" : t.pca1 < -1 ? "#ff5555" : "#666" },
+            { label: "pca2 momentum", value: `${t.pca2 >= 0 ? "+" : ""}${t.pca2.toFixed(3)}`, color: t.aligned ? "#00c896" : "#f0c040" },
+            { label: "entropy", value: `${e.rho.toFixed(3)}×`, color: ec },
+            { label: "vol z-score", value: `${t.vol_z >= 0 ? "+" : ""}${t.vol_z.toFixed(3)}`, color: t.vol_z > 1.5 ? "#ff5555" : t.vol_z > 0.5 ? "#f0c040" : "#555" },
+          ].map(({ label, value, color }, i, arr) => (
+            <div key={label} style={{ paddingRight: i < arr.length - 1 ? "20px" : 0, borderRight: i < arr.length - 1 ? "0.5px solid #141414" : "none", marginRight: i < arr.length - 1 ? "20px" : 0 }}>
+              <p style={{ fontSize: "9px", letterSpacing: "0.2em", color: "#333", textTransform: "uppercase", marginBottom: "6px" }}>{label}</p>
+              <p style={{ fontSize: "13px", fontFamily: "JetBrains Mono, monospace", color, fontWeight: 500 }}>{value}</p>
+            </div>
+          ))}
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "20px" }}>
+          {[
+            { label: "what is regime?", desc: "the overall market state — bull trend, bear trend, consolidation, or extended. derived from where price sits in PCA space relative to historical clusters." },
+            { label: "what is pca1?", desc: "primary trend axis. values above +1 = strong uptrend. below −1 = strong downtrend. near zero = no clear direction. this is the biggest driver of the bias vote." },
+            { label: "what is pca2?", desc: "momentum axis — how fast the trend is moving. when pca1 and pca2 are aligned (same sign), the move has follow-through. misaligned = trend may be fading." },
+            { label: "what is entropy?", desc: "measures information disorder in the price structure. below 1× = clean, reliable signals. above 1× = conflicting signals, reduce size. above 2× = stop trading, edge is gone." },
+            { label: "what is vol z?", desc: "how many standard deviations current realized volatility is above its mean. above +1.5 = vol spike, expect chop. near zero = calm tape, trend signals more reliable." },
+          ].map(({ label, desc }) => (
+            <div key={label}>
+              <p style={{ fontSize: "9px", color: "#2a2a2a", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "4px" }}>{label}</p>
+              <p style={{ fontSize: "10px", color: "#272727", lineHeight: 1.7 }}>{desc}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
       {!loading && hist && !hist.error && (
@@ -331,24 +347,37 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
           </div>
 
           {/* Entropy */}
-          <div style={{ border: "0.5px solid #1a1a1a", borderRadius: "6px", padding: "14px 16px", background: "#0a0a0a" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-              <span style={{ fontSize: "9px", letterSpacing: "0.25em", color: "#333", textTransform: "uppercase" }}>entropy — {e.status}</span>
-              <span style={{ fontSize: "12px", fontFamily: "JetBrains Mono, monospace", color: ENT_COLOR[e.status] || "#666", fontWeight: 500 }}>{e.rho.toFixed(3)}× threshold</span>
+          <div style={{ border: "0.5px solid #1a1a1a", borderRadius: "6px", padding: "18px 20px", background: "#0a0a0a" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "14px" }}>
+              <div>
+                <span style={{ fontSize: "9px", letterSpacing: "0.25em", color: "#333", textTransform: "uppercase" }}>entropy</span>
+                <p style={{ fontSize: "10px", color: "#2a2a2a", marginTop: "3px" }}>measures signal reliability — higher = more noise, less edge</p>
+              </div>
+              <div style={{ textAlign: "right" }}>
+                <span style={{ fontSize: "16px", fontFamily: "JetBrains Mono, monospace", color: ENT_COLOR[e.status] || "#666", fontWeight: 500 }}>{e.rho.toFixed(3)}×</span>
+                <p style={{ fontSize: "9px", color: ENT_COLOR[e.status] || "#666", marginTop: "2px", letterSpacing: "0.15em", textTransform: "uppercase" }}>{e.status}</p>
+              </div>
             </div>
-            <div style={{ display: "flex", gap: "20px", marginBottom: "10px" }}>
-              <span style={{ fontSize: "10px", color: "#333" }}>current {e.entropy.toFixed(5)}</span>
-              <span style={{ fontSize: "10px", color: "#555" }}>threshold {e.threshold.toFixed(5)}</span>
-              <span style={{ fontSize: "10px", color: e.trend === "rising" ? "#f0c040" : "#555" }}>
-                {e.trend === "rising" ? "↑ rising into close" : "↓ falling into close"}
-              </span>
+            <div style={{ display: "flex", gap: "24px", marginBottom: "12px" }}>
+              {[
+                { label: "current", value: e.entropy.toFixed(5) },
+                { label: "threshold", value: e.threshold.toFixed(5) },
+                { label: "trend", value: e.trend === "rising" ? "↑ rising" : "↓ falling", color: e.trend === "rising" ? "#f0c040" : "#555" },
+              ].map(({ label, value, color }) => (
+                <div key={label}>
+                  <p style={{ fontSize: "9px", color: "#2a2a2a", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "3px" }}>{label}</p>
+                  <p style={{ fontSize: "11px", fontFamily: "JetBrains Mono, monospace", color: color || "#444" }}>{value}</p>
+                </div>
+              ))}
             </div>
-            <p style={{ fontSize: "10px", color: "#333", marginTop: "4px" }}>
-              {e.status === "CRITICAL" ? "entropy critical — signal noise high, reduce size or stand aside" :
-               e.status === "ELEVATED" ? "entropy elevated — conflicting signals, trade smaller" :
-               e.rho < 0.5 ? "entropy very low — market highly ordered, signals reliable" :
-               "entropy normal — information flow stable, signals reliable"}
-            </p>
+            <div style={{ padding: "10px 14px", borderRadius: "4px", background: "#060606", border: "0.5px solid #141414" }}>
+              <p style={{ fontSize: "11px", color: ENT_COLOR[e.status] || "#555", lineHeight: 1.7 }}>
+                {e.status === "CRITICAL" ? "⚠ entropy critical — signal noise overwhelms edge. stand aside or reduce to minimum size." :
+                 e.status === "ELEVATED" ? "entropy elevated — conflicting signals present. trade half size until entropy normalizes." :
+                 e.rho < 0.5 ? "entropy very low — market is highly ordered. signals are clean and reliable, full size is justified." :
+                 "entropy normal — information flow is stable. signals are reliable, standard sizing applies."}
+              </p>
+            </div>
           </div>
 
                 </>

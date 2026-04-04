@@ -134,12 +134,22 @@ export default function MacroTab({ macro: m }: { macro: MacroData }) {
       )}
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-        <MacroCard label="walcl — fed balance sheet" d={m.walcl.direction} note={m.walcl.note} />
+        <MacroCard label="walcl — fed balance sheet" d={m.walcl.direction} note={m.walcl.note}
+          extra={
+            <p style={{ fontSize: "10px", color: "#2a2a2a", marginTop: "10px", lineHeight: 1.7 }}>
+              WALCL is the total size of the fed&apos;s balance sheet. when it expands (QE), the fed is buying assets and injecting liquidity — bullish for risk. when it contracts (QT), they are draining reserves — bearish headwind. we track the weekly change to catch inflection points before they hit price.
+            </p>
+          } />
         <MacroCard label="reserves / rrp — h.4.1" d={m.reserves_rrp.direction} s={m.reserves_rrp.strength} note={m.reserves_rrp.note}
           extra={
-            <div style={{ display: "flex", gap: "16px", marginTop: "8px" }}>
-              <span style={{ fontSize: "11px", color: "#444" }}>res {m.reserves_rrp.res_chg >= 0 ? "+" : ""}{m.reserves_rrp.res_chg}B</span>
-              <span style={{ fontSize: "11px", color: "#444" }}>rrp {m.reserves_rrp.rrp_chg >= 0 ? "+" : ""}{m.reserves_rrp.rrp_chg}B</span>
+            <div style={{ marginTop: "10px" }}>
+              <div style={{ display: "flex", gap: "16px", marginBottom: "8px" }}>
+                <span style={{ fontSize: "11px", color: "#444" }}>res {m.reserves_rrp.res_chg >= 0 ? "+" : ""}{m.reserves_rrp.res_chg}B</span>
+                <span style={{ fontSize: "11px", color: "#444" }}>rrp {m.reserves_rrp.rrp_chg >= 0 ? "+" : ""}{m.reserves_rrp.rrp_chg}B</span>
+              </div>
+              <p style={{ fontSize: "10px", color: "#2a2a2a", lineHeight: 1.7 }}>
+                reserves are cash sitting at the fed — more reserves = more bank liquidity = bullish. RRP (reverse repo) is where money market funds park cash overnight. when RRP drains, that cash moves into the system (bullish). when RRP rises, cash is being pulled out (bearish). we watch both together for net system liquidity direction.
+              </p>
             </div>
           } />
       </div>
@@ -167,6 +177,9 @@ export default function MacroTab({ macro: m }: { macro: MacroData }) {
           <span>healthy &lt;3%</span><span>concern 3–4%</span><span>stress 4–5%</span><span>crisis 5%+</span>
         </div>
         <p style={{ fontSize: "12px", color: "#555" }}>{m.oas.note}</p>
+        <p style={{ fontSize: "10px", color: "#2a2a2a", marginTop: "10px", lineHeight: 1.7 }}>
+          OAS (option-adjusted spread) measures how much extra yield corporate bonds demand over treasuries. tight spreads (&lt;3%) = markets are calm, credit is healthy, risk appetite is high. wide spreads (4%+) = stress — institutions are pricing in default risk and rotating to safety. sharp moves in OAS often precede equity selloffs by 1–3 sessions.
+        </p>
       </div>
 
       {/* Signal summary */}
@@ -185,6 +198,14 @@ export default function MacroTab({ macro: m }: { macro: MacroData }) {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* how bias is derived */}
+      <div className="glass" style={{ padding: "18px" }}>
+        <p style={{ fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", color: "#444", marginBottom: "12px" }}>how macro drives the bias</p>
+        <p style={{ fontSize: "11px", color: "#2a2a2a", lineHeight: 1.8 }}>
+          macro signals feed directly into the bias score as weighted votes. the fed balance sheet (walcl) and system liquidity (reserves/rrp) together carry 30% of the total score — they set the underlying tide that either supports or fights the structural signals. credit spreads (oas) add 10%, acting as a stress circuit breaker: if spreads blow out, the bias score gets dragged bearish regardless of price structure. treasury auction warnings reduce the size factor, meaning even a bullish bias trades smaller when the government is flooding the market with supply that week.
+        </p>
       </div>
 
       {/* AI Outlook */}

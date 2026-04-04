@@ -162,19 +162,29 @@ export default function BiasTab({ bias }: Props) {
 
       {/* layer votes */}
       <div style={{ border: "0.5px solid #1a1a1a", background: "#0d0d0d", borderRadius: "8px", padding: "24px" }}>
-        <p style={{ fontSize: "9px", letterSpacing: "0.3em", color: "#333", textTransform: "uppercase", marginBottom: "20px" }}>layer breakdown</p>
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          {["topology", "gex", "reserves_rrp", "oas", "walcl", "auction"].map(key => {
+        <p style={{ fontSize: "9px", letterSpacing: "0.3em", color: "#333", textTransform: "uppercase", marginBottom: "6px" }}>layer breakdown</p>
+        <p style={{ fontSize: "11px", color: "#2a2a2a", marginBottom: "20px", lineHeight: 1.6 }}>
+          each layer votes bullish (+) or bearish (−) and is weighted by importance. the final score is the weighted sum, scaled by entropy.
+        </p>
+        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+          {[
+            { key: "topology", desc: "market regime via PCA — captures trend direction and momentum alignment across the full price structure" },
+            { key: "gex", desc: "gamma exposure — above vol trigger means dealers pin price (suppresses moves), below means they amplify moves" },
+            { key: "reserves_rrp", desc: "fed h.4.1 reserves + reverse repo — rising reserves = more system liquidity = bullish tailwind" },
+            { key: "oas", desc: "option-adjusted credit spreads — wide spreads signal stress and risk-off, tight spreads = healthy risk appetite" },
+            { key: "walcl", desc: "fed balance sheet size — expanding = liquidity injection = bullish, contracting = tightening = bearish" },
+            { key: "auction", desc: "treasury auction calendar — heavy supply this week can pressure rates and drag on equities" },
+          ].map(({ key, desc }) => {
             const vote = bias.votes[key] ?? 0
             const weight = WEIGHTS[key] ?? 0
             const contribution = vote * weight
             const vc = vote > 0.3 ? "#00c896" : vote < -0.3 ? "#ff5555" : "#f0c040"
             return (
-              <div key={key}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "5px" }}>
-                  <span style={{ fontSize: "11px", color: "#555", fontFamily: "JetBrains Mono, monospace" }}>{LABELS[key]}</span>
+              <div key={key} style={{ borderBottom: "0.5px solid #111", paddingBottom: "14px" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "4px" }}>
+                  <span style={{ fontSize: "11px", color: "#666", fontFamily: "JetBrains Mono, monospace" }}>{LABELS[key]}</span>
                   <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-                    <span style={{ fontSize: "10px", color: "#2a2a2a" }}>{(weight * 100).toFixed(0)}%</span>
+                    <span style={{ fontSize: "10px", color: "#2a2a2a" }}>wt {(weight * 100).toFixed(0)}%</span>
                     <span style={{ fontSize: "11px", fontFamily: "JetBrains Mono, monospace", color: vc, minWidth: "44px", textAlign: "right" }}>
                       {vote >= 0 ? "+" : ""}{vote.toFixed(2)}
                     </span>
@@ -183,12 +193,25 @@ export default function BiasTab({ bias }: Props) {
                     </span>
                   </div>
                 </div>
-                <div style={{ height: "1px", background: "#111", borderRadius: "1px", overflow: "hidden" }}>
+                <div style={{ height: "1px", background: "#111", borderRadius: "1px", overflow: "hidden", marginBottom: "6px" }}>
                   <div style={{ height: "100%", width: `${Math.abs(vote) * 100}%`, background: vc, borderRadius: "1px" }} />
                 </div>
+                <p style={{ fontSize: "10px", color: "#2a2a2a", lineHeight: 1.6 }}>{desc}</p>
               </div>
             )
           })}
+        </div>
+
+        {/* score math */}
+        <div style={{ marginTop: "20px", padding: "14px", background: "#080808", borderRadius: "6px", border: "0.5px solid #161616" }}>
+          <p style={{ fontSize: "9px", letterSpacing: "0.2em", color: "#2a2a2a", textTransform: "uppercase", marginBottom: "10px" }}>how the score is calculated</p>
+          <p style={{ fontSize: "11px", color: "#2a2a2a", lineHeight: 1.8 }}>
+            score = Σ(layer vote × weight) × entropy factor<br />
+            <span style={{ color: "#222" }}>
+              if score &gt; 0.25 → BULLISH · if score &lt; −0.25 → BEARISH · otherwise NEUTRAL<br />
+              conviction = |score| × 100 · size rule scales down when entropy is elevated or topology is near a regime boundary
+            </span>
+          </p>
         </div>
       </div>
     </div>

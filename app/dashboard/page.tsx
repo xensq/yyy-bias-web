@@ -4,7 +4,7 @@ import { fetchBias, BiasData } from "@/lib/api"
 import BiasTab from "@/components/tabs/BiasTab"
 import TopologyTab from "@/components/tabs/TopologyTab"
 import GexTab from "@/components/tabs/GexTab"
-import IVTab from "@/components/tabs/IVTab"
+import NetIVTab from "@/components/tabs/NetIVTab"
 import IVSurfaceTab from "@/components/tabs/IVSurfaceTab"
 import MacroTab from "@/components/tabs/MacroTab"
 import { useRouter } from "next/navigation"
@@ -116,7 +116,7 @@ export default function Dashboard() {
             {tab === "bias"      && <BiasTab bias={data.bias} />}
             {tab === "topology"  && <TopologyTab topology={data.topology} entropy={data.entropy} />}
             {tab === "gex"       && <GexTab gex={data.gex} />}
-            {tab === "net iv"    && <IVTab />}
+            {tab === "net iv"    && <NetIVTab />}
             {tab === "macro"     && <MacroTab macro={data.macro} />}
           </>
         )}
