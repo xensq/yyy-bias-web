@@ -108,7 +108,7 @@ export default function Landing() {
         <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "32px" }}>
           <div style={{ width: "24px", height: "1px", background: "rgba(0,200,150,0.5)" }} />
           <span style={{ fontSize: "10px", letterSpacing: "0.35em", color: "rgba(0,200,150,0.6)", fontFamily: "JetBrains Mono, monospace", textTransform: "uppercase" }}>
-            market intelligence
+            analysis software
           </span>
         </div>
 
@@ -126,10 +126,7 @@ export default function Landing() {
         </h1>
 
         {/* descriptor */}
-        <p style={{ fontSize: "13px", color: "#333", marginBottom: "48px", fontFamily: "JetBrains Mono, monospace", maxWidth: "400px", lineHeight: 1.8 }}>
-          gamma exposure · entropy · topology<br />
-          nightly bias engine · iv surface
-        </p>
+
 
         {/* cta */}
         <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
