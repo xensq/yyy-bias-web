@@ -1,5 +1,8 @@
 "use client"
 import { useEffect, useState, useRef } from "react"
+import dynamic from "next/dynamic"
+// @ts-ignore
+const Plot = dynamic(() => import("react-plotly.js"), { ssr: false })
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 
@@ -195,6 +198,60 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
           </div>
         ))}
       </div>
+
+      {!loading && hist && !hist.error && (
+        <div style={{ border: "0.5px solid #1a1a1a", borderRadius: "8px", background: "#050505", overflow: "hidden", marginBottom: "4px" }}>
+          <div style={{ padding: "10px 16px", borderBottom: "0.5px solid #111" }}>
+            <span style={{ fontSize: "9px", letterSpacing: "0.25em", color: "#333", textTransform: "uppercase" }}>phase space · pca1 × pca2 × vol z · drag to rotate</span>
+          </div>
+          <Plot
+            data={[
+              {
+                type: "scatter3d" as const,
+                x: hist.pca1.slice(0, -1),
+                y: hist.pca2.slice(0, -1),
+                z: hist.vol_z.slice(0, -1),
+                mode: "markers" as const,
+                marker: {
+                  size: 3.5,
+                  color: hist.entropy.slice(0, -1).map((v: number, i: number) => v / (hist.threshold[i] || 1)),
+                  colorscale: [[0, "#00c896"], [0.6, "#f0c040"], [0.85, "#f97316"], [1.0, "#ff3333"]] as any,
+                  cmin: 0, cmax: 1.3,
+                  opacity: 0.55,
+                  showscale: false
+                },
+                hoverinfo: "skip" as const
+              },
+              {
+                type: "scatter3d" as const,
+                x: [hist.pca1[hist.pca1.length - 1]],
+                y: [hist.pca2[hist.pca2.length - 1]],
+                z: [hist.vol_z[hist.vol_z.length - 1]],
+                mode: "markers" as const,
+                marker: { size: 11, color: "#f97316", line: { color: "#fff", width: 1 } },
+                hovertemplate: `trend: ${t.pca1.toFixed(3)}<br>momentum: ${t.pca2.toFixed(3)}<br>vol z: ${t.vol_z.toFixed(3)}<extra>now</extra>`,
+                showlegend: false
+              }
+            ]}
+            layout={{
+              paper_bgcolor: "rgba(0,0,0,0)",
+              plot_bgcolor: "rgba(0,0,0,0)",
+              margin: { l: 0, r: 0, t: 0, b: 0 },
+              scene: {
+                bgcolor: "#050505",
+                xaxis: { title: { text: "PCA1 Trend", font: { family: "JetBrains Mono", size: 9, color: "#444" } }, gridcolor: "#141414", tickfont: { family: "JetBrains Mono", size: 8, color: "#444" } },
+                yaxis: { title: { text: "PCA2 Mom", font: { family: "JetBrains Mono", size: 9, color: "#444" } }, gridcolor: "#141414", tickfont: { family: "JetBrains Mono", size: 8, color: "#444" } },
+                zaxis: { title: { text: "Vol Z", font: { family: "JetBrains Mono", size: 9, color: "#444" } }, gridcolor: "#141414", tickfont: { family: "JetBrains Mono", size: 8, color: "#444" } },
+                camera: { eye: { x: 1.6, y: -1.6, z: 1.1 } }
+              },
+              dragmode: "orbit"
+            } as any}
+            config={{ displayModeBar: false, responsive: true, scrollZoom: true }}
+            style={{ width: "100%", height: "420px" }}
+            useResizeHandler
+          />
+        </div>
+      )}
 
       {loading ? (
         <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "#333", fontSize: "12px", padding: "20px 0" }}>
