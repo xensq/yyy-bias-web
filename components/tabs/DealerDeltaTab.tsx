@@ -15,6 +15,9 @@ interface DealerDeltaData {
 
 export default function DealerDeltaTab() {
   const [ticker, setTicker] = useState("SPX")
+  const [calcPrice, setCalcPrice] = useState("")
+  const [calcResult, setCalcResult] = useState<{contracts: number; direction: string; supportive: boolean; prob: string} | null>(null)
+  const [hoveredStrike, setHoveredStrike] = useState<number | null>(null)
   const [data, setData] = useState<DealerDeltaData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -30,12 +33,38 @@ export default function DealerDeltaTab() {
 
   const leanColor = data?.dealer_lean === "long" ? "var(--bull)" : "var(--bear)"
 
+  const runCalculator = () => {
+    if (!data || !calcPrice) return
+    const target = parseFloat(calcPrice)
+    if (isNaN(target)) return
+    const pctMove = (target - data.spot) / data.spot
+    const absMove = Math.abs(pctMove)
+    // Interpolate hedge pressure
+    let contracts = 0
+    if (target > data.spot) {
+      contracts = pctMove <= 0.01 ? data.hedge_up_1pct * (pctMove / 0.01) :
+                  pctMove <= 0.02 ? data.hedge_up_1pct + (data.hedge_up_2pct - data.hedge_up_1pct) * ((pctMove - 0.01) / 0.01) :
+                  data.hedge_up_2pct * (pctMove / 0.02)
+    } else {
+      contracts = pctMove >= -0.01 ? data.hedge_dn_1pct * (Math.abs(pctMove) / 0.01) :
+                  pctMove >= -0.02 ? data.hedge_dn_1pct + (data.hedge_dn_2pct - data.hedge_dn_1pct) * ((Math.abs(pctMove) - 0.01) / 0.01) :
+                  data.hedge_dn_2pct * (Math.abs(pctMove) / 0.02)
+    }
+    contracts = Math.round(contracts)
+    const supportive = (target > data.spot && contracts > 0) || (target < data.spot && contracts < 0)
+    // Simple log-normal probability
+    const sigma = 0.01024 // ~1% daily sigma
+    const z = Math.abs(Math.log(target / data.spot)) / sigma
+    const prob = z < 1 ? "68%" : z < 2 ? "27%" : z < 3 ? "5%" : "<1%"
+    setCalcResult({ contracts, direction: contracts > 0 ? "buying" : "selling", supportive, prob })
+  }
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
       {/* header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
-          <p style={{ fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--dim)" }}>dealer positioning — delta exposure</p>
+          <p style={{ fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--dim)" }}>delta exposure — dealer positioning</p>
           <p style={{ fontSize: "11px", color: "var(--muted)", marginTop: "3px" }}>which direction dealers must hedge if price moves</p>
         </div>
         <div style={{ display: "flex", gap: "6px" }}>
@@ -131,36 +160,97 @@ export default function DealerDeltaTab() {
 
           {/* Per-strike delta chart */}
           {data.strike_data.length > 0 && (
-            <div className="glass" style={{ padding: "20px" }}>
-              <p style={{ fontSize: "9px", letterSpacing: "0.2em", color: "var(--dim)", textTransform: "uppercase", marginBottom: "16px" }}>net dealer delta by strike</p>
-              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            <div className="glass" style={{ padding: "16px" }}>
+              <p style={{ fontSize: "9px", letterSpacing: "0.2em", color: "var(--dim)", textTransform: "uppercase", marginBottom: "12px" }}>net dealer delta by strike</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "2px", position: "relative" }}>
                 {[...data.strike_data].sort((a, b) => b.strike - a.strike).map(row => {
                   const max = Math.max(...data.strike_data.map(r => Math.abs(r.net_delta))) || 1
                   const pct = Math.abs(row.net_delta) / max * 100
-                  const color = row.net_delta > 0 ? "rgba(0,200,150,0.6)" : "rgba(255,85,85,0.6)"
+                  const color = row.net_delta > 0 ? "rgba(0,200,150,0.65)" : "rgba(255,85,85,0.65)"
                   const isNear = Math.abs(row.strike - data.spot) < 5
+                  const isHovered = hoveredStrike === row.strike
                   return (
-                    <div key={row.strike} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                      <span style={{ fontSize: "9px", fontFamily: "JetBrains Mono, monospace", color: isNear ? "var(--text)" : "var(--muted)", width: "52px", textAlign: "right" }}>
+                    <div key={row.strike}
+                      style={{ display: "flex", alignItems: "center", gap: "8px", padding: "1px 4px", borderRadius: "2px", background: isHovered ? "rgba(255,255,255,0.03)" : "transparent", position: "relative", cursor: "crosshair" }}
+                      onMouseEnter={() => setHoveredStrike(row.strike)}
+                      onMouseLeave={() => setHoveredStrike(null)}
+                    >
+                      <span style={{ fontSize: "9px", fontFamily: "JetBrains Mono, monospace", color: isNear ? "var(--text)" : isHovered ? "var(--dim)" : "var(--muted)", width: "48px", textAlign: "right" }}>
                         {row.strike.toLocaleString()}
                       </span>
-                      <div style={{ flex: 1, height: "10px", background: "rgba(255,255,255,0.03)", borderRadius: "2px", overflow: "hidden", position: "relative" }}>
+                      <div style={{ flex: 1, height: "8px", background: "rgba(255,255,255,0.02)", borderRadius: "2px", overflow: "hidden", position: "relative" }}>
                         <div style={{ position: "absolute", top: 0, bottom: 0, width: "1px", left: "50%", background: "var(--border)" }} />
                         <div style={{
-                          position: "absolute", top: 0, bottom: 0, borderRadius: "2px", background: color,
+                          position: "absolute", top: 0, bottom: 0, borderRadius: "2px",
+                          background: isHovered ? (row.net_delta > 0 ? "rgba(0,200,150,0.9)" : "rgba(255,85,85,0.9)") : color,
                           width: `${pct / 2}%`,
-                          left: row.net_delta >= 0 ? "50%" : `${50 - pct / 2}%`
+                          left: row.net_delta >= 0 ? "50%" : `${50 - pct / 2}%`,
+                          transition: "background 0.1s"
                         }} />
                       </div>
-                      <span style={{ fontSize: "9px", fontFamily: "JetBrains Mono, monospace", color: row.net_delta > 0 ? "var(--bull)" : "var(--bear)", width: "64px" }}>
+                      <span style={{ fontSize: "9px", fontFamily: "JetBrains Mono, monospace", color: row.net_delta > 0 ? "var(--bull)" : "var(--bear)", width: "72px" }}>
                         {row.net_delta >= 0 ? "+" : ""}{row.net_delta.toLocaleString()}
                       </span>
+                      {/* Hover tooltip */}
+                      {isHovered && (
+                        <div style={{ position: "absolute", left: "140px", top: "-30px", zIndex: 50, background: "#0f0f1a", border: "0.5px solid rgba(255,255,255,0.1)", borderRadius: "4px", padding: "8px 12px", whiteSpace: "nowrap", pointerEvents: "none" }}>
+                          <p style={{ fontSize: "10px", color: "var(--text)", marginBottom: "3px", fontFamily: "JetBrains Mono, monospace" }}>strike {row.strike.toLocaleString()}</p>
+                          <p style={{ fontSize: "10px", color: row.net_delta > 0 ? "var(--bull)" : "var(--bear)", fontFamily: "JetBrains Mono, monospace" }}>
+                            {row.net_delta >= 0 ? "+" : ""}{row.net_delta.toLocaleString()} delta
+                          </p>
+                          <p style={{ fontSize: "9px", color: "var(--muted)", marginTop: "2px" }}>
+                            {row.above_spot ? `+${(row.strike - data.spot).toFixed(0)} above spot` : `${(row.strike - data.spot).toFixed(0)} below spot`}
+                          </p>
+                          <p style={{ fontSize: "9px", color: row.net_delta > 0 ? "var(--bull)" : "var(--bear)", marginTop: "2px" }}>
+                            {row.net_delta > 0 ? "dealers net long — stabilizing" : "dealers net short — amplifying"}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   )
                 })}
               </div>
             </div>
           )}
+
+          {/* Price Calculator */}
+          <div className="glass" style={{ padding: "20px", borderColor: "rgba(200,160,80,0.15)", background: "rgba(200,160,80,0.02)" }}>
+            <p style={{ fontSize: "9px", letterSpacing: "0.2em", color: "var(--warn)", textTransform: "uppercase", marginBottom: "6px" }}>delta calculator — if price goes here, dealers do this</p>
+            <p style={{ fontSize: "10px", color: "var(--muted)", marginBottom: "14px", lineHeight: 1.6 }}>type any price level to see how many contracts dealers must buy or sell to get there, and whether that flow supports or fights the move.</p>
+            <div style={{ display: "flex", gap: "10px", alignItems: "center", marginBottom: "16px" }}>
+              <input
+                type="number"
+                value={calcPrice}
+                onChange={e => { setCalcPrice(e.target.value); setCalcResult(null) }}
+                onKeyDown={e => e.key === "Enter" && runCalculator()}
+                placeholder={data.spot.toFixed(0)}
+                style={{ flex: 1, padding: "10px 14px", background: "rgba(255,255,255,0.03)", border: "0.5px solid var(--border)", borderRadius: "4px", color: "var(--text)", fontSize: "14px", fontFamily: "JetBrains Mono, monospace", outline: "none" }}
+              />
+              <button onClick={runCalculator}
+                style={{ padding: "10px 20px", background: "rgba(200,160,80,0.1)", border: "0.5px solid rgba(200,160,80,0.4)", borderRadius: "4px", color: "var(--warn)", fontSize: "10px", letterSpacing: "0.15em", textTransform: "uppercase", cursor: "pointer", fontFamily: "inherit" }}>
+                calculate →
+              </button>
+            </div>
+            {calcResult && (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px" }}>
+                <div style={{ padding: "14px", background: "rgba(255,255,255,0.02)", borderRadius: "6px", border: `0.5px solid ${calcResult.supportive ? "rgba(0,200,150,0.2)" : "rgba(255,85,85,0.2)"}` }}>
+                  <p style={{ fontSize: "9px", color: "var(--dim)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "6px" }}>dealer action</p>
+                  <p style={{ fontSize: "18px", fontFamily: "JetBrains Mono, monospace", color: calcResult.contracts > 0 ? "var(--bull)" : "var(--bear)", fontWeight: 600, textTransform: "uppercase" }}>{calcResult.direction}</p>
+                  <p style={{ fontSize: "10px", color: "var(--muted)", marginTop: "4px" }}>{Math.abs(calcResult.contracts).toLocaleString()} contracts</p>
+                </div>
+                <div style={{ padding: "14px", background: "rgba(255,255,255,0.02)", borderRadius: "6px", border: `0.5px solid ${calcResult.supportive ? "rgba(0,200,150,0.2)" : "rgba(255,85,85,0.2)"}` }}>
+                  <p style={{ fontSize: "9px", color: "var(--dim)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "6px" }}>flow type</p>
+                  <p style={{ fontSize: "18px", fontFamily: "JetBrains Mono, monospace", color: calcResult.supportive ? "var(--bull)" : "var(--bear)", fontWeight: 600, textTransform: "uppercase" }}>{calcResult.supportive ? "supportive" : "headwind"}</p>
+                  <p style={{ fontSize: "10px", color: "var(--muted)", marginTop: "4px" }}>{calcResult.supportive ? "dealers help the move" : "dealers fight the move"}</p>
+                </div>
+                <div style={{ padding: "14px", background: "rgba(255,255,255,0.02)", borderRadius: "6px", border: "0.5px solid var(--border)" }}>
+                  <p style={{ fontSize: "9px", color: "var(--dim)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "6px" }}>1-day probability</p>
+                  <p style={{ fontSize: "18px", fontFamily: "JetBrains Mono, monospace", color: "var(--text)", fontWeight: 600 }}>{calcResult.prob}</p>
+                  <p style={{ fontSize: "10px", color: "var(--muted)", marginTop: "4px" }}>of reaching {parseFloat(calcPrice).toLocaleString()}</p>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* How to use */}
           <div className="glass" style={{ padding: "18px", borderColor: "rgba(255,255,255,0.05)" }}>
