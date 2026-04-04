@@ -93,7 +93,7 @@ function OutlookSection() {
 
       {error && (
         <div style={{ fontSize: "12px", color: "#555", lineHeight: 1.7 }}>
-          {error.includes("OPENROUTER_API_KEY") || error.includes("ANTHROPIC_API_KEY") ? (
+          {error.includes("OPENROUTER_API_KEY") || error.includes("OPENROUTER_API_KEY") || error.includes("ANTHROPIC_API_KEY") ? (
             <>
               <p>To enable AI-generated outlooks, add your Anthropic API key to Railway:</p>
               <p style={{ marginTop: "8px", color: "#444" }}>Railway → your service → Variables → Add <code style={{ background: "#1a1a1a", padding: "2px 6px" }}>OPENROUTER_API_KEY</code> → redeploy</p>
