@@ -105,58 +105,6 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
       )}
 
 
-      {/* Entropy history chart */}
-      {!loading && hist && !hist.error && hist.entropy.length > 1 && (
-        <div style={{ background: "rgba(0,0,0,0)", border: "1px solid var(--border)", overflow: "hidden" }}>
-          <div style={{ padding: "10px 20px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between" }}>
-            <span style={{ fontSize: "9px", letterSpacing: "0.2em", color: "var(--muted)", textTransform: "uppercase" }}>entropy · signal noise over time</span>
-            <span style={{ fontSize: "9px", color: "var(--muted)" }}>{hist.n} sessions</span>
-          </div>
-          <Plot
-            data={[
-              {
-                type: "scatter" as const,
-                x: Array.from({ length: hist.entropy.length }, (_, i) => i),
-                y: hist.threshold,
-                mode: "lines" as const,
-                line: { color: "rgba(220,38,38,0.25)", width: 1, dash: "dot" },
-                name: "threshold",
-                hoverinfo: "skip" as const,
-              },
-              {
-                type: "scatter" as const,
-                x: Array.from({ length: hist.entropy.length }, (_, i) => i),
-                y: hist.entropy,
-                mode: "lines" as const,
-                fill: "tozeroy" as const,
-                fillcolor: "rgba(220,38,38,0.04)",
-                line: { color: "rgba(220,38,38,0.6)", width: 1.5 },
-                name: "entropy",
-                hovertemplate: "session %{x}<br>entropy: %{y:.5f}<extra></extra>",
-              },
-              {
-                type: "scatter" as const,
-                x: [hist.entropy.length - 1],
-                y: [hist.entropy[hist.entropy.length - 1]],
-                mode: "markers" as const,
-                marker: { size: 7, color: "#f97316", line: { color: "#fff", width: 1 } },
-                hoverinfo: "skip" as const,
-                showlegend: false,
-              }
-            ]}
-            layout={{
-              paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
-              margin: { l: 48, r: 16, t: 8, b: 28 },
-              showlegend: false,
-              xaxis: { showgrid: false, zeroline: false, tickfont: { family: "JetBrains Mono", size: 8, color: "#44445a" }, title: { text: "sessions ago", font: { family: "JetBrains Mono", size: 8, color: "#44445a" } } },
-              yaxis: { gridcolor: "#1e1e2e", zeroline: false, tickfont: { family: "JetBrains Mono", size: 8, color: "#44445a" } },
-            } as any}
-            config={{ displayModeBar: false, responsive: true }}
-            style={{ width: "100%", height: "180px" }}
-            useResizeHandler
-          />
-        </div>
-      )}
       {loading && (
         <div style={{ background: "var(--surface)", border: "1px solid var(--border)", padding: "32px", display: "flex", alignItems: "center", gap: "8px", color: "var(--muted)", fontSize: "11px" }}>
           <div style={{ width: "4px", height: "4px", background: "var(--accent)", borderRadius: "50%", animation: "pulse 1.5s infinite" }} />
