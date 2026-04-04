@@ -26,7 +26,7 @@ export default function Landing() {
       opacity: Math.random() * 0.4 + 0.1
     }))
 
-    const stars = Array.from({ length: 100 }, () => ({ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight, r: Math.random() * 1.2 + 0.3, speed: Math.random() * 0.2 + 0.05, opacity: Math.random() * 0.5 + 0.1 }))
+    const starsSmall = Array.from({ length: 100 }, () => ({ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight, r: Math.random() * 1.2 + 0.3, speed: Math.random() * 0.2 + 0.05, opacity: Math.random() * 0.5 + 0.1 }))
     let t = 0
 
     const draw = () => {
