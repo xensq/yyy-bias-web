@@ -14,8 +14,6 @@ interface GexProps {
 export default function GexTab({ gex: g }: GexProps) {
   const [hovered, setHovered] = useState<{ strike: number; call_gex: number; put_gex: number; net: number; x: number; y: number } | null>(null)
 
-  if (g.error) return <div style={{ color: "#ff5555", fontSize: "12px", marginTop: "16px" }}>{g.error}</div>
-
   useEffect(() => {
     if (ticker === "SPX") { setG(initialGex); return }
     setLoading(true)
@@ -25,6 +23,8 @@ export default function GexTab({ gex: g }: GexProps) {
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [ticker])
+
+  if (g.error) return <div style={{ color: "#ff5555", fontSize: "12px", marginTop: "16px" }}>{g.error}</div>
 
   const strikes = useMemo(() => {
     if (!g.strike_data?.length) return []
