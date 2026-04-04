@@ -9,10 +9,10 @@ interface NetIVData { dates: string[]; rows: Row[]; spot: number; status: string
 
 function fmt(d: string) { return d.slice(5) }
 function changeColor(c: number | null) {
-  if (c === null || c === undefined) return "#333"
+  if (c === null || c === undefined) return "var(--muted)"
   if (c > 0.005) return "#ff5555"
   if (c < -0.005) return "#00c896"
-  return "#555"
+  return "var(--dim)"
 }
 function ivColor(iv: number) {
   if (iv > 0.30) return "#ff5555"
@@ -40,15 +40,15 @@ export default function NetIVTab() {
       {/* header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
-          <p style={{ fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: "#444" }}>net iv — implied volatility surface history</p>
-          <p style={{ fontSize: "11px", color: "#2a2a2a", marginTop: "3px" }}>daily iv change by strike · green = iv falling · red = iv rising</p>
+          <p style={{ fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--dim)" }}>net iv — implied volatility surface history</p>
+          <p style={{ fontSize: "11px", color: "var(--muted)", marginTop: "3px" }}>daily iv change by strike · green = iv falling · red = iv rising</p>
         </div>
         <div style={{ display: "flex", gap: "6px" }}>
           {TICKERS.map(t => (
             <button key={t} onClick={() => setTicker(t)}
-              style={{ padding: "5px 12px", border: `0.5px solid ${ticker === t ? "var(--accent)" : "#1a1a1a"}`,
+              style={{ padding: "5px 12px", border: `0.5px solid ${ticker === t ? "var(--accent)" : "var(--border)"}`,
                 background: ticker === t ? "rgba(200,160,80,0.08)" : "transparent",
-                color: ticker === t ? "var(--accent)" : "#444", fontSize: "10px",
+                color: ticker === t ? "var(--accent)" : "var(--dim)", fontSize: "10px",
                 letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", fontFamily: "inherit", borderRadius: "3px" }}>
               {t}
             </button>
@@ -57,7 +57,7 @@ export default function NetIVTab() {
       </div>
 
       {loading && (
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "#333", fontSize: "12px", padding: "32px 0" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "var(--muted)", fontSize: "12px", padding: "32px 0" }}>
           <div style={{ width: "5px", height: "5px", background: "var(--accent)", borderRadius: "50%", animation: "pulse 1.5s infinite" }} />
           loading iv history...
         </div>
@@ -67,8 +67,8 @@ export default function NetIVTab() {
 
       {data?.status === "building_history" && (
         <div className="glass" style={{ padding: "32px", textAlign: "center" }}>
-          <p style={{ fontSize: "13px", color: "#555", marginBottom: "8px" }}>building iv history</p>
-          <p style={{ fontSize: "11px", color: "#333", lineHeight: 1.7 }}>
+          <p style={{ fontSize: "13px", color: "var(--dim)", marginBottom: "8px" }}>building iv history</p>
+          <p style={{ fontSize: "11px", color: "var(--muted)", lineHeight: 1.7 }}>
             first snapshot captured. check back tomorrow — net iv needs 2+ days of data to show changes.<br />
             each day a new snapshot is stored and compared to the prior session.
           </p>
@@ -79,9 +79,9 @@ export default function NetIVTab() {
         <>
           {/* spot */}
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-            <span style={{ fontSize: "10px", color: "#333", textTransform: "uppercase", letterSpacing: "0.15em" }}>spot</span>
+            <span style={{ fontSize: "10px", color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.15em" }}>spot</span>
             <span style={{ fontSize: "14px", fontFamily: "JetBrains Mono, monospace", color: "#888" }}>{data.spot.toLocaleString()}</span>
-            <span style={{ fontSize: "10px", color: "#2a2a2a" }}>· showing atm ±5% strikes</span>
+            <span style={{ fontSize: "10px", color: "var(--muted)" }}>· showing atm ±5% strikes</span>
           </div>
 
           {/* table */}
@@ -90,9 +90,9 @@ export default function NetIVTab() {
               <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "JetBrains Mono, monospace", fontSize: "11px" }}>
                 <thead>
                   <tr style={{ borderBottom: "0.5px solid #1a1a1a" }}>
-                    <th style={{ padding: "10px 16px", textAlign: "left", color: "#333", fontWeight: 400, fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase" }}>strike</th>
+                    <th style={{ padding: "10px 16px", textAlign: "left", color: "var(--muted)", fontWeight: 400, fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase" }}>strike</th>
                     {data.dates.map(d => (
-                      <th key={d} style={{ padding: "10px 14px", textAlign: "center", color: "#333", fontWeight: 400, fontSize: "9px", letterSpacing: "0.15em" }}>{fmt(d)}</th>
+                      <th key={d} style={{ padding: "10px 14px", textAlign: "center", color: "var(--muted)", fontWeight: 400, fontSize: "9px", letterSpacing: "0.15em" }}>{fmt(d)}</th>
                     ))}
                   </tr>
                 </thead>
@@ -104,13 +104,13 @@ export default function NetIVTab() {
                         borderBottom: "0.5px solid #111",
                         background: isAtm ? "rgba(200,160,80,0.04)" : "transparent"
                       }}>
-                        <td style={{ padding: "9px 16px", color: isAtm ? "var(--accent)" : "#555", whiteSpace: "nowrap" }}>
+                        <td style={{ padding: "9px 16px", color: isAtm ? "var(--accent)" : "var(--dim)", whiteSpace: "nowrap" }}>
                           {row.strike.toLocaleString()}
                           {isAtm && <span style={{ fontSize: "8px", color: "var(--accent)", marginLeft: "6px", letterSpacing: "0.1em" }}>ATM</span>}
                         </td>
                         {data.dates.map(d => {
                           const cell = row.values[d]
-                          if (!cell) return <td key={d} style={{ padding: "9px 14px", textAlign: "center", color: "#222" }}>—</td>
+                          if (!cell) return <td key={d} style={{ padding: "9px 14px", textAlign: "center", color: "var(--muted)" }}>—</td>
                           return (
                             <td key={d} style={{ padding: "9px 14px", textAlign: "center" }}>
                               <div style={{ color: ivColor(cell.iv), fontSize: "11px" }}>{(cell.iv * 100).toFixed(1)}%</div>
@@ -135,14 +135,14 @@ export default function NetIVTab() {
             {[["IV > 30%", "#ff5555"], ["IV 20–30%", "#f0c040"], ["IV < 20%", "#888"]].map(([l, c]) => (
               <div key={l} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                 <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: c as string }} />
-                <span style={{ fontSize: "9px", color: "#333", letterSpacing: "0.1em" }}>{l}</span>
+                <span style={{ fontSize: "9px", color: "var(--muted)", letterSpacing: "0.1em" }}>{l}</span>
               </div>
             ))}
-            <div style={{ width: "1px", background: "#1a1a1a" }} />
+            <div style={{ width: "1px", background: "var(--border)" }} />
             {[["rising iv", "#ff5555"], ["falling iv", "#00c896"]].map(([l, c]) => (
               <div key={l} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                 <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: c as string }} />
-                <span style={{ fontSize: "9px", color: "#333", letterSpacing: "0.1em" }}>{l} (Δ)</span>
+                <span style={{ fontSize: "9px", color: "var(--muted)", letterSpacing: "0.1em" }}>{l} (Δ)</span>
               </div>
             ))}
           </div>

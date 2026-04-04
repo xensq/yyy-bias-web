@@ -64,9 +64,9 @@ export default function IVSurfaceTab() {
       showscale: true,
       colorbar: {
         thickness: 8, len: 0.65, x: 1.01,
-        tickfont: { family: "JetBrains Mono, monospace", size: 8, color: "#444" },
+        tickfont: { family: "JetBrains Mono, monospace", size: 8, color: "var(--dim)" },
         tickformat: ".0%",
-        title: { text: "IV", font: { color: "#444", size: 9, family: "JetBrains Mono" } }
+        title: { text: "IV", font: { color: "var(--dim)", size: 9, family: "JetBrains Mono" } }
       },
       contours: {
         z: { show: true, usecolormap: true, highlightcolor: "rgba(255,255,255,0.15)", project: { z: false } },
@@ -93,21 +93,21 @@ export default function IVSurfaceTab() {
     plot_bgcolor: "rgba(0,0,0,0)",
     margin: { l: 0, r: 60, t: 10, b: 0 },
     scene: {
-      bgcolor: "#050505",
+      bgcolor: "#0a0a10",
       xaxis: {
-        title: { text: "moneyness (K/S)", font: { family: "JetBrains Mono", size: 9, color: "#444" } },
-        gridcolor: "#141414", zerolinecolor: "#1e1e1e",
-        tickfont: { family: "JetBrains Mono", size: 8, color: "#444" }, tickformat: ".2f"
+        title: { text: "moneyness (K/S)", font: { family: "JetBrains Mono", size: 9, color: "var(--dim)" } },
+        gridcolor: "rgba(255,255,255,0.06)", zerolinecolor: "#1e1e1e",
+        tickfont: { family: "JetBrains Mono", size: 8, color: "var(--dim)" }, tickformat: ".2f"
       },
       yaxis: {
-        title: { text: "DTE", font: { family: "JetBrains Mono", size: 9, color: "#444" } },
-        gridcolor: "#141414", zerolinecolor: "#1e1e1e",
-        tickfont: { family: "JetBrains Mono", size: 8, color: "#444" }
+        title: { text: "DTE", font: { family: "JetBrains Mono", size: 9, color: "var(--dim)" } },
+        gridcolor: "rgba(255,255,255,0.06)", zerolinecolor: "#1e1e1e",
+        tickfont: { family: "JetBrains Mono", size: 8, color: "var(--dim)" }
       },
       zaxis: {
-        title: { text: "IV", font: { family: "JetBrains Mono", size: 9, color: "#444" } },
-        gridcolor: "#141414", zerolinecolor: "#1e1e1e",
-        tickfont: { family: "JetBrains Mono", size: 8, color: "#444" }, tickformat: ".0%"
+        title: { text: "IV", font: { family: "JetBrains Mono", size: 9, color: "var(--dim)" } },
+        gridcolor: "rgba(255,255,255,0.06)", zerolinecolor: "#1e1e1e",
+        tickfont: { family: "JetBrains Mono", size: 8, color: "var(--dim)" }, tickformat: ".0%"
       },
       camera: { eye: { x: 1.9, y: -1.7, z: 0.9 }, up: { x: 0, y: 0, z: 1 } },
       aspectmode: "manual",
@@ -120,8 +120,8 @@ export default function IVSurfaceTab() {
     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
-          <p style={{ fontSize: "9px", letterSpacing: "0.3em", color: "#333", textTransform: "uppercase", marginBottom: "6px" }}>iv surface</p>
-          <p style={{ fontSize: "12px", color: "#555", fontFamily: "JetBrains Mono, monospace" }}>
+          <p style={{ fontSize: "9px", letterSpacing: "0.3em", color: "var(--muted)", textTransform: "uppercase", marginBottom: "6px" }}>iv surface</p>
+          <p style={{ fontSize: "12px", color: "var(--dim)", fontFamily: "JetBrains Mono, monospace" }}>
             implied volatility by moneyness and expiration
             {data ? ` · spot ${data.spot.toLocaleString()} · atm iv ${(data.atm_iv * 100).toFixed(1)}%` : ""}
           </p>
@@ -131,17 +131,17 @@ export default function IVSurfaceTab() {
             <button key={t} onClick={() => setTicker(t)} style={{
               padding: "6px 14px", fontSize: "11px", letterSpacing: "0.1em",
               fontFamily: "JetBrains Mono, monospace",
-              border: `0.5px solid ${ticker === t ? "#00c896" : "#1a1a1a"}`,
+              border: `0.5px solid ${ticker === t ? "#00c896" : "var(--border)"}`,
               background: ticker === t ? "rgba(0,200,150,0.08)" : "transparent",
-              color: ticker === t ? "#00c896" : "#444",
+              color: ticker === t ? "#00c896" : "var(--dim)",
               cursor: "pointer", borderRadius: "4px"
             }}>{t}</button>
           ))}
         </div>
       </div>
-      <div style={{ border: "0.5px solid #1a1a1a", borderRadius: "8px", background: "#050505", overflow: "hidden" }}>
+      <div style={{ border: "0.5px solid #1a1a1a", borderRadius: "8px", background: "#0a0a10", overflow: "hidden" }}>
         {loading && (
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "#444", fontSize: "12px", padding: "100px 0", justifyContent: "center", fontFamily: "JetBrains Mono, monospace" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "var(--dim)", fontSize: "12px", padding: "100px 0", justifyContent: "center", fontFamily: "JetBrains Mono, monospace" }}>
             <div style={{ width: "5px", height: "5px", background: "#00c896", borderRadius: "50%" }} />
             loading {ticker} options chain...
           </div>
@@ -157,7 +157,7 @@ export default function IVSurfaceTab() {
           />
         )}
       </div>
-      <div style={{ display: "flex", gap: "24px", fontSize: "10px", color: "#333", fontFamily: "JetBrains Mono, monospace" }}>
+      <div style={{ display: "flex", gap: "24px", fontSize: "10px", color: "var(--muted)", fontFamily: "JetBrains Mono, monospace" }}>
         <span>· drag to rotate · scroll to zoom</span>
         <span>· color: teal → amber → red = low → mid → high IV</span>
         <span>· teal line = ATM (moneyness 1.0)</span>

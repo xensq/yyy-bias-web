@@ -5,22 +5,22 @@
 
 :root {
   --accent: #00c896;
-  --accent-dim: rgba(0,200,150,0.15);
-  --bg: #0a0a0a;
-  --surface: #111111;
-  --border: #1f1f1f;
-  --text: #e8e8e8;
-  --dim: #555555;
-  --muted: #333333;
+  --accent-dim: rgba(0,200,150,0.12);
+  --bg: #080810;
+  --surface: #0f0f1a;
+  --border: #2a2a3a;
+  --text: #f0f0f0;
+  --dim: #888899;
+  --muted: #555566;
   --bull: #00c896;
   --bear: #ff5555;
   --warn: #f0c040;
 }
 
-[data-theme="crimson"] { --accent: #dc2626; --accent-dim: rgba(220,38,38,0.15); --bull: #22c55e; --bear: #dc2626; }
-[data-theme="gold"]    { --accent: #f0c040; --accent-dim: rgba(240,192,64,0.15); --bull: #f0c040; --bear: #ef4444; }
-[data-theme="blue"]    { --accent: #3b82f6; --accent-dim: rgba(59,130,246,0.15); --bull: #3b82f6; --bear: #ef4444; }
-[data-theme="silver"]  { --accent: #94a3b8; --accent-dim: rgba(148,163,184,0.15); --bull: #94a3b8; --bear: #f87171; }
+[data-theme="crimson"] { --accent: #dc2626; --accent-dim: rgba(220,38,38,0.12); --bull: #22c55e; --bear: #dc2626; }
+[data-theme="gold"]    { --accent: #f0c040; --accent-dim: rgba(240,192,64,0.12); --bull: #f0c040; --bear: #ef4444; }
+[data-theme="blue"]    { --accent: #3b82f6; --accent-dim: rgba(59,130,246,0.12); --bull: #3b82f6; --bear: #ef4444; }
+[data-theme="silver"]  { --accent: #94a3b8; --accent-dim: rgba(148,163,184,0.12); --bull: #94a3b8; --bear: #f87171; }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -30,25 +30,56 @@ body {
   font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
   line-height: 1.6;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0,200,150,0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(0,100,255,0.03) 0%, transparent 60%);
+  background-attachment: fixed;
 }
 
 ::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: #0a0a0a; }
-::-webkit-scrollbar-thumb { background: #222; border-radius: 2px; }
+::-webkit-scrollbar-track { background: #080810; }
+::-webkit-scrollbar-thumb { background: #2a2a3a; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #3a3a4a; }
 
-.tab-active   { color: var(--text); border-bottom: 1px solid var(--text); }
-.tab-inactive { color: #3a3a3a; border-bottom: 1px solid transparent; }
-.tab-inactive:hover { color: #666; }
+.tab-active   { color: var(--text); border-bottom: 1px solid var(--accent) !important; color: var(--accent) !important; }
+.tab-inactive { color: #444455; border-bottom: 1px solid transparent; }
+.tab-inactive:hover { color: #888899; }
 
-.cell-strong-bull { background: rgba(0,200,150,0.20); color: #00c896; }
-.cell-mild-bull   { background: rgba(0,200,150,0.08); color: #00a878; }
-.cell-strong-bear { background: rgba(255,85,85,0.20);  color: #ff5555; }
-.cell-mild-bear   { background: rgba(255,85,85,0.08);  color: #cc4444; }
-.cell-neutral     { background: transparent; color: #444; }
-.cell-empty       { background: transparent; color: #2a2a2a; }
+.cell-strong-bull { background: rgba(0,200,150,0.15); color: #00c896; }
+.cell-mild-bull   { background: rgba(0,200,150,0.07); color: #00a878; }
+.cell-strong-bear { background: rgba(255,85,85,0.15);  color: #ff5555; }
+.cell-mild-bear   { background: rgba(255,85,85,0.07);  color: #cc4444; }
+.cell-neutral     { background: transparent; color: #555566; }
+.cell-empty       { background: transparent; color: #333344; }
 
 .glass {
-  background: rgba(255,255,255,0.02);
-  border: 0.5px solid var(--border);
-  border-radius: 8px;
+  background: rgba(255,255,255,0.03);
+  border: 0.5px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  backdrop-filter: blur(4px);
+}
+
+.glass:hover {
+  border-color: rgba(255,255,255,0.11);
+}
+
+/* readable description text everywhere */
+p, span {
+  -webkit-font-smoothing: antialiased;
+}
+
+/* glow pulse for live indicator */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 4px rgba(0,200,150,0.4); }
+  50% { box-shadow: 0 0 12px rgba(0,200,150,0.8); }
+}
+
+/* nav active glow */
+nav button[style*="var(--accent)"] {
+  text-shadow: 0 0 12px rgba(0,200,150,0.5);
 }

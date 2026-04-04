@@ -73,17 +73,17 @@ export default function Dashboard() {
               </nav>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-              <p style={{ fontSize: "10px", color: "#333" }}>{now}</p>
+              <p style={{ fontSize: "10px", color: "var(--muted)" }}>{now}</p>
               <div style={{ position: "relative" }}>
                 <button onClick={() => setShowThemes(!showThemes)}
-                  style={{ fontSize: "10px", letterSpacing: "0.1em", color: "#333", background: "none", border: "0.5px solid #1f1f1f", padding: "4px 10px", cursor: "pointer", fontFamily: "inherit", textTransform: "uppercase" }}>
+                  style={{ fontSize: "10px", letterSpacing: "0.1em", color: "var(--muted)", background: "none", border: "0.5px solid #1f1f1f", padding: "4px 10px", cursor: "pointer", fontFamily: "inherit", textTransform: "uppercase" }}>
                   theme
                 </button>
                 {showThemes && (
-                  <div style={{ position: "absolute", right: 0, top: "calc(100% + 8px)", background: "#111", border: "0.5px solid #1f1f1f", minWidth: "120px", zIndex: 50 }}>
+                  <div style={{ position: "absolute", right: 0, top: "calc(100% + 8px)", background: "var(--border)", border: "0.5px solid #1f1f1f", minWidth: "120px", zIndex: 50 }}>
                     {THEMES.map(th => (
                       <button key={th.id} onClick={() => { setTheme(th.id); setShowThemes(false) }}
-                        style={{ display: "block", width: "100%", textAlign: "left", padding: "8px 14px", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", background: theme === th.id ? "rgba(255,255,255,0.03)" : "none", color: theme === th.id ? "var(--accent)" : "#555", border: "none", cursor: "pointer", fontFamily: "inherit" }}>
+                        style={{ display: "block", width: "100%", textAlign: "left", padding: "8px 14px", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", background: theme === th.id ? "rgba(255,255,255,0.03)" : "none", color: theme === th.id ? "var(--accent)" : "var(--dim)", border: "none", cursor: "pointer", fontFamily: "inherit" }}>
                         {th.label}
                       </button>
                     ))}
@@ -97,7 +97,7 @@ export default function Dashboard() {
 
       <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "24px" }}>
         {loading && (
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "#444", fontSize: "12px", marginTop: "48px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "var(--dim)", fontSize: "12px", marginTop: "48px" }}>
             <div style={{ width: "6px", height: "6px", background: "var(--accent)", borderRadius: "50%" }} />
             pulling live data...
           </div>
@@ -120,7 +120,7 @@ export default function Dashboard() {
             {tab === "macro"     && <MacroTab macro={data.macro} />}
           </>
         )}
-        <p style={{ textAlign: "center", color: "#222", fontSize: "11px", marginTop: "48px", letterSpacing: "0.1em" }}>not financial advice</p>
+        <p style={{ textAlign: "center", color: "var(--muted)", fontSize: "11px", marginTop: "48px", letterSpacing: "0.1em" }}>not financial advice</p>
       </div>
     </main>
   )

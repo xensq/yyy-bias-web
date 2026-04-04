@@ -63,7 +63,7 @@ export default function GexTab({ gex: g }: GexProps) {
           { label: "max pain",       value: g.max_pain.toLocaleString(), color: "#888" },
         ].map(({ label, value, color }) => (
           <div key={label} className="glass" style={{ padding: "16px" }}>
-            <p style={{ fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", color: "#444", marginBottom: "8px" }}>{label}</p>
+            <p style={{ fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--dim)", marginBottom: "8px" }}>{label}</p>
             <p style={{ fontSize: "13px", fontWeight: 500, color }}>{value}</p>
           </div>
         ))}
@@ -72,24 +72,24 @@ export default function GexTab({ gex: g }: GexProps) {
       {/* butterfly chart */}
       <div className="glass" style={{ padding: "20px", overflowX: "auto" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-          <p style={{ fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "#444" }}>gex profile by strike</p>
-          <div style={{ display: "flex", gap: "20px", fontSize: "10px", color: "#444" }}>
+          <p style={{ fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--dim)" }}>gex profile by strike</p>
+          <div style={{ display: "flex", gap: "20px", fontSize: "10px", color: "var(--dim)" }}>
             <span style={{ display: "flex", alignItems: "center", gap: "6px" }}><span style={{ width: "8px", height: "8px", background: "rgba(0,200,150,0.7)", display: "inline-block" }} />calls</span>
             <span style={{ display: "flex", alignItems: "center", gap: "6px" }}><span style={{ width: "8px", height: "8px", background: "rgba(255,85,85,0.7)", display: "inline-block" }} />puts</span>
           </div>
         </div>
 
         {strikes.length === 0 ? (
-          <p style={{ color: "#444", fontSize: "12px" }}>no strike data — market may be closed</p>
+          <p style={{ color: "var(--dim)", fontSize: "12px" }}>no strike data — market may be closed</p>
         ) : (
           <svg width={TOTAL_W} height={CHART_H} style={{ display: "block", minWidth: TOTAL_W }}>
             {/* axis labels */}
-            <text x={Y_LABEL_W + HALF} y={18} textAnchor="middle" fill="#2a2a2a" fontSize="9" fontFamily="JetBrains Mono, monospace">0</text>
-            <text x={Y_LABEL_W + 8} y={18} textAnchor="start" fill="#2a2a2a" fontSize="9" fontFamily="JetBrains Mono, monospace">puts ←</text>
-            <text x={Y_LABEL_W + CHART_W - 8} y={18} textAnchor="end" fill="#2a2a2a" fontSize="9" fontFamily="JetBrains Mono, monospace">→ calls</text>
+            <text x={Y_LABEL_W + HALF} y={18} textAnchor="middle" fill="var(--muted)" fontSize="9" fontFamily="JetBrains Mono, monospace">0</text>
+            <text x={Y_LABEL_W + 8} y={18} textAnchor="start" fill="var(--muted)" fontSize="9" fontFamily="JetBrains Mono, monospace">puts ←</text>
+            <text x={Y_LABEL_W + CHART_W - 8} y={18} textAnchor="end" fill="var(--muted)" fontSize="9" fontFamily="JetBrains Mono, monospace">→ calls</text>
 
             {/* center line */}
-            <line x1={Y_LABEL_W+HALF} y1={24} x2={Y_LABEL_W+HALF} y2={CHART_H-8} stroke="#1a1a1a" strokeWidth="1" />
+            <line x1={Y_LABEL_W+HALF} y1={24} x2={Y_LABEL_W+HALF} y2={CHART_H-8} stroke="var(--border)" strokeWidth="1" />
 
             {/* bars */}
             {strikes.map((s, i) => {
@@ -102,7 +102,7 @@ export default function GexTab({ gex: g }: GexProps) {
                   {/* strike label */}
                   <text x={Y_LABEL_W - 6} y={y + BAR_HEIGHT/2 + 4} textAnchor="end" fontSize="9"
                     fontFamily="JetBrains Mono, monospace"
-                    fill={isSpot ? "var(--text)" : "#333"}>
+                    fill={isSpot ? "var(--text)" : "var(--muted)"}>
                     {s.strike.toLocaleString()}
                   </text>
                   {/* put bar (left) */}
@@ -144,7 +144,7 @@ export default function GexTab({ gex: g }: GexProps) {
         <p style={{ fontSize: "12px", fontWeight: 500, color: g.above_vol_trigger ? "var(--bull)" : "var(--bear)", marginBottom: "6px" }}>
           {g.above_vol_trigger ? "positive gamma environment" : "negative gamma environment"}
         </p>
-        <p style={{ fontSize: "12px", color: "#555", lineHeight: 1.7 }}>
+        <p style={{ fontSize: "12px", color: "var(--dim)", lineHeight: 1.7 }}>
           {g.above_vol_trigger
             ? "Spot is above the vol trigger. Dealers are long gamma — they actively hedge by buying dips and selling rips, which dampens realized volatility. Price tends to revert toward key levels. Avoid chasing extended moves."
             : "Spot is below the vol trigger. Dealers are short gamma — their hedging amplifies directional moves rather than dampening them. Do not fade strong momentum. Size down and let moves develop before positioning."}

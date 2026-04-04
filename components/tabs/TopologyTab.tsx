@@ -37,7 +37,7 @@ function BarChart({ data, label, color, threshold }: { data: number[]; label: st
     ctx.beginPath()
     ctx.moveTo(0, midY)
     ctx.lineTo(W, midY)
-    ctx.strokeStyle = "#1a1a1a"
+    ctx.strokeStyle = "var(--border)"
     ctx.lineWidth = 1
     ctx.stroke()
 
@@ -171,9 +171,9 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
   }
 
   const Panel = ({ children, label, value, color }: { children: React.ReactNode; label: string; value: string; color: string }) => (
-    <div style={{ border: "0.5px solid #1a1a1a", borderRadius: "6px", padding: "14px 16px", background: "#0a0a0a" }}>
+    <div style={{ border: "0.5px solid #1a1a1a", borderRadius: "6px", padding: "14px 16px", background: "var(--surface)" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-        <span style={{ fontSize: "9px", letterSpacing: "0.25em", color: "#333", textTransform: "uppercase" }}>{label}</span>
+        <span style={{ fontSize: "9px", letterSpacing: "0.25em", color: "var(--muted)", textTransform: "uppercase" }}>{label}</span>
         <span style={{ fontSize: "12px", fontFamily: "JetBrains Mono, monospace", color, fontWeight: 500 }}>{value}</span>
       </div>
       {children}
@@ -184,17 +184,17 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
     <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
 
       {/* status bar */}
-      <div style={{ border: "0.5px solid #1a1a1a", borderRadius: "8px", background: "#0a0a0a", padding: "18px 20px" }}>
+      <div style={{ border: "0.5px solid #1a1a1a", borderRadius: "8px", background: "var(--surface)", padding: "18px 20px" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "0", borderBottom: "0.5px solid #141414", paddingBottom: "14px", marginBottom: "14px" }}>
           {[
             { label: "regime", value: t.regime, color: rc },
             { label: "pca1 trend", value: `${t.pca1 >= 0 ? "+" : ""}${t.pca1.toFixed(3)}`, color: t.pca1 > 1 ? "#00c896" : t.pca1 < -1 ? "#ff5555" : "#666" },
             { label: "pca2 momentum", value: `${t.pca2 >= 0 ? "+" : ""}${t.pca2.toFixed(3)}`, color: t.aligned ? "#00c896" : "#f0c040" },
             { label: "entropy", value: `${e.rho.toFixed(3)}×`, color: ec },
-            { label: "vol z-score", value: `${t.vol_z >= 0 ? "+" : ""}${t.vol_z.toFixed(3)}`, color: t.vol_z > 1.5 ? "#ff5555" : t.vol_z > 0.5 ? "#f0c040" : "#555" },
+            { label: "vol z-score", value: `${t.vol_z >= 0 ? "+" : ""}${t.vol_z.toFixed(3)}`, color: t.vol_z > 1.5 ? "#ff5555" : t.vol_z > 0.5 ? "#f0c040" : "var(--dim)" },
           ].map(({ label, value, color }, i, arr) => (
             <div key={label} style={{ paddingRight: i < arr.length - 1 ? "20px" : 0, borderRight: i < arr.length - 1 ? "0.5px solid #141414" : "none", marginRight: i < arr.length - 1 ? "20px" : 0 }}>
-              <p style={{ fontSize: "9px", letterSpacing: "0.2em", color: "#333", textTransform: "uppercase", marginBottom: "6px" }}>{label}</p>
+              <p style={{ fontSize: "9px", letterSpacing: "0.2em", color: "var(--muted)", textTransform: "uppercase", marginBottom: "6px" }}>{label}</p>
               <p style={{ fontSize: "13px", fontFamily: "JetBrains Mono, monospace", color, fontWeight: 500 }}>{value}</p>
             </div>
           ))}
@@ -208,17 +208,17 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
             { label: "what is vol z?", desc: "how many standard deviations current realized volatility is above its mean. above +1.5 = vol spike, expect chop. near zero = calm tape, trend signals more reliable." },
           ].map(({ label, desc }) => (
             <div key={label}>
-              <p style={{ fontSize: "9px", color: "#2a2a2a", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "4px" }}>{label}</p>
-              <p style={{ fontSize: "10px", color: "#272727", lineHeight: 1.7 }}>{desc}</p>
+              <p style={{ fontSize: "9px", color: "var(--muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "4px" }}>{label}</p>
+              <p style={{ fontSize: "10px", color: "var(--muted)", lineHeight: 1.7 }}>{desc}</p>
             </div>
           ))}
         </div>
       </div>
 
       {!loading && hist && !hist.error && (
-        <div style={{ border: "0.5px solid #1a1a1a", borderRadius: "8px", background: "#050505", overflow: "hidden", marginBottom: "4px" }}>
+        <div style={{ border: "0.5px solid #1a1a1a", borderRadius: "8px", background: "#0a0a10", overflow: "hidden", marginBottom: "4px" }}>
           <div style={{ padding: "10px 16px", borderBottom: "0.5px solid #111" }}>
-            <span style={{ fontSize: "9px", letterSpacing: "0.25em", color: "#333", textTransform: "uppercase" }}>phase space · pca1 × pca2 × vol z · drag to rotate</span>
+            <span style={{ fontSize: "9px", letterSpacing: "0.25em", color: "var(--muted)", textTransform: "uppercase" }}>phase space · pca1 × pca2 × vol z · drag to rotate</span>
           </div>
           <Plot
             data={[
@@ -254,10 +254,10 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
               plot_bgcolor: "rgba(0,0,0,0)",
               margin: { l: 0, r: 0, t: 0, b: 0 },
               scene: {
-                bgcolor: "#050505",
-                xaxis: { title: { text: "PCA1 Trend", font: { family: "JetBrains Mono", size: 9, color: "#444" } }, gridcolor: "#141414", tickfont: { family: "JetBrains Mono", size: 8, color: "#444" } },
-                yaxis: { title: { text: "PCA2 Mom", font: { family: "JetBrains Mono", size: 9, color: "#444" } }, gridcolor: "#141414", tickfont: { family: "JetBrains Mono", size: 8, color: "#444" } },
-                zaxis: { title: { text: "Vol Z", font: { family: "JetBrains Mono", size: 9, color: "#444" } }, gridcolor: "#141414", tickfont: { family: "JetBrains Mono", size: 8, color: "#444" } },
+                bgcolor: "#0a0a10",
+                xaxis: { title: { text: "PCA1 Trend", font: { family: "JetBrains Mono", size: 9, color: "var(--dim)" } }, gridcolor: "rgba(255,255,255,0.06)", tickfont: { family: "JetBrains Mono", size: 8, color: "var(--dim)" } },
+                yaxis: { title: { text: "PCA2 Mom", font: { family: "JetBrains Mono", size: 9, color: "var(--dim)" } }, gridcolor: "rgba(255,255,255,0.06)", tickfont: { family: "JetBrains Mono", size: 8, color: "var(--dim)" } },
+                zaxis: { title: { text: "Vol Z", font: { family: "JetBrains Mono", size: 9, color: "var(--dim)" } }, gridcolor: "rgba(255,255,255,0.06)", tickfont: { family: "JetBrains Mono", size: 8, color: "var(--dim)" } },
                 camera: { eye: { x: 1.6, y: -1.6, z: 1.1 } }
               },
               dragmode: "orbit"
@@ -270,16 +270,16 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
       )}
 
       {loading ? (
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "#333", fontSize: "12px", padding: "20px 0" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "var(--muted)", fontSize: "12px", padding: "20px 0" }}>
           <div style={{ width: "5px", height: "5px", background: "#00c896", borderRadius: "50%" }} />
           loading chart data...
         </div>
       ) : hist && !hist.error ? (
         <>
           {/* 3D Time Series */}
-          <div style={{ border: "0.5px solid #1a1a1a", borderRadius: "8px", background: "#050505", overflow: "hidden" }}>
+          <div style={{ border: "0.5px solid #1a1a1a", borderRadius: "8px", background: "#0a0a10", overflow: "hidden" }}>
             <div style={{ padding: "10px 16px", borderBottom: "0.5px solid #111" }}>
-              <span style={{ fontSize: "9px", letterSpacing: "0.25em", color: "#333", textTransform: "uppercase" }}>structural history · trend · momentum · vol z-score · drag to rotate</span>
+              <span style={{ fontSize: "9px", letterSpacing: "0.25em", color: "var(--muted)", textTransform: "uppercase" }}>structural history · trend · momentum · vol z-score · drag to rotate</span>
             </div>
             <Plot
               data={[
@@ -330,12 +330,12 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
                 plot_bgcolor: "rgba(0,0,0,0)",
                 margin: { l: 0, r: 0, t: 0, b: 0 },
                 showlegend: true,
-                legend: { font: { family: "JetBrains Mono", size: 9, color: "#444" }, bgcolor: "transparent", x: 0.01, y: 0.99 },
+                legend: { font: { family: "JetBrains Mono", size: 9, color: "var(--dim)" }, bgcolor: "transparent", x: 0.01, y: 0.99 },
                 scene: {
-                  bgcolor: "#050505",
-                  xaxis: { title: { text: "Time", font: { family: "JetBrains Mono", size: 9, color: "#333" } }, gridcolor: "#141414", tickfont: { family: "JetBrains Mono", size: 8, color: "#333" }, showticklabels: false },
-                  yaxis: { title: { text: "Trend (PCA1)", font: { family: "JetBrains Mono", size: 9, color: "#00c896" } }, gridcolor: "#141414", tickfont: { family: "JetBrains Mono", size: 8, color: "#444" }, zerolinecolor: "#1e1e1e" },
-                  zaxis: { title: { text: "Momentum (PCA2)", font: { family: "JetBrains Mono", size: 9, color: "#0084ff" } }, gridcolor: "#141414", tickfont: { family: "JetBrains Mono", size: 8, color: "#444" }, zerolinecolor: "#1e1e1e" },
+                  bgcolor: "#0a0a10",
+                  xaxis: { title: { text: "Time", font: { family: "JetBrains Mono", size: 9, color: "var(--muted)" } }, gridcolor: "rgba(255,255,255,0.06)", tickfont: { family: "JetBrains Mono", size: 8, color: "var(--muted)" }, showticklabels: false },
+                  yaxis: { title: { text: "Trend (PCA1)", font: { family: "JetBrains Mono", size: 9, color: "#00c896" } }, gridcolor: "rgba(255,255,255,0.06)", tickfont: { family: "JetBrains Mono", size: 8, color: "var(--dim)" }, zerolinecolor: "#1e1e1e" },
+                  zaxis: { title: { text: "Momentum (PCA2)", font: { family: "JetBrains Mono", size: 9, color: "#0084ff" } }, gridcolor: "rgba(255,255,255,0.06)", tickfont: { family: "JetBrains Mono", size: 8, color: "var(--dim)" }, zerolinecolor: "#1e1e1e" },
                   camera: { eye: { x: 2.0, y: 0.8, z: 0.8 } }
                 },
                 dragmode: "orbit"
@@ -347,11 +347,11 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
           </div>
 
           {/* Entropy */}
-          <div style={{ border: "0.5px solid #1a1a1a", borderRadius: "6px", padding: "18px 20px", background: "#0a0a0a" }}>
+          <div style={{ border: "0.5px solid #1a1a1a", borderRadius: "6px", padding: "18px 20px", background: "var(--surface)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "14px" }}>
               <div>
-                <span style={{ fontSize: "9px", letterSpacing: "0.25em", color: "#333", textTransform: "uppercase" }}>entropy</span>
-                <p style={{ fontSize: "10px", color: "#2a2a2a", marginTop: "3px" }}>measures signal reliability — higher = more noise, less edge</p>
+                <span style={{ fontSize: "9px", letterSpacing: "0.25em", color: "var(--muted)", textTransform: "uppercase" }}>entropy</span>
+                <p style={{ fontSize: "10px", color: "var(--muted)", marginTop: "3px" }}>measures signal reliability — higher = more noise, less edge</p>
               </div>
               <div style={{ textAlign: "right" }}>
                 <span style={{ fontSize: "16px", fontFamily: "JetBrains Mono, monospace", color: ENT_COLOR[e.status] || "#666", fontWeight: 500 }}>{e.rho.toFixed(3)}×</span>
@@ -362,16 +362,16 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
               {[
                 { label: "current", value: e.entropy.toFixed(5) },
                 { label: "threshold", value: e.threshold.toFixed(5) },
-                { label: "trend", value: e.trend === "rising" ? "↑ rising" : "↓ falling", color: e.trend === "rising" ? "#f0c040" : "#555" },
+                { label: "trend", value: e.trend === "rising" ? "↑ rising" : "↓ falling", color: e.trend === "rising" ? "#f0c040" : "var(--dim)" },
               ].map(({ label, value, color }) => (
                 <div key={label}>
-                  <p style={{ fontSize: "9px", color: "#2a2a2a", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "3px" }}>{label}</p>
-                  <p style={{ fontSize: "11px", fontFamily: "JetBrains Mono, monospace", color: color || "#444" }}>{value}</p>
+                  <p style={{ fontSize: "9px", color: "var(--muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "3px" }}>{label}</p>
+                  <p style={{ fontSize: "11px", fontFamily: "JetBrains Mono, monospace", color: color || "var(--dim)" }}>{value}</p>
                 </div>
               ))}
             </div>
-            <div style={{ padding: "10px 14px", borderRadius: "4px", background: "#060606", border: "0.5px solid #141414" }}>
-              <p style={{ fontSize: "11px", color: ENT_COLOR[e.status] || "#555", lineHeight: 1.7 }}>
+            <div style={{ padding: "10px 14px", borderRadius: "4px", background: "#0c0c14", border: "0.5px solid #141414" }}>
+              <p style={{ fontSize: "11px", color: ENT_COLOR[e.status] || "var(--dim)", lineHeight: 1.7 }}>
                 {e.status === "CRITICAL" ? "⚠ entropy critical — signal noise overwhelms edge. stand aside or reduce to minimum size." :
                  e.status === "ELEVATED" ? "entropy elevated — conflicting signals present. trade half size until entropy normalizes." :
                  e.rho < 0.5 ? "entropy very low — market is highly ordered. signals are clean and reliable, full size is justified." :
@@ -382,7 +382,7 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
 
                 </>
       ) : (
-        <p style={{ fontSize: "12px", color: "#444", padding: "20px 0" }}>chart data unavailable</p>
+        <p style={{ fontSize: "12px", color: "var(--dim)", padding: "20px 0" }}>chart data unavailable</p>
       )}
     </div>
   )

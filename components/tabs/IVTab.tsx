@@ -17,12 +17,12 @@ interface NetIVData {
 }
 
 function changeColor(c: number | null) {
-  if (c === null) return "#333"
+  if (c === null) return "var(--muted)"
   if (c > 0.01) return "#ff5555"
   if (c > 0.003) return "#f97316"
   if (c < -0.01) return "#00c896"
   if (c < -0.003) return "#4ade80"
-  return "#444"
+  return "var(--dim)"
 }
 
 function fmt(c: number | null) {
@@ -62,8 +62,8 @@ export default function IVSurfaceTab() {
     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
-          <p style={{ fontSize: "9px", letterSpacing: "0.3em", color: "#333", textTransform: "uppercase", marginBottom: "6px" }}>net iv</p>
-          <p style={{ fontSize: "12px", color: "#555", fontFamily: mono }}>
+          <p style={{ fontSize: "9px", letterSpacing: "0.3em", color: "var(--muted)", textTransform: "uppercase", marginBottom: "6px" }}>net iv</p>
+          <p style={{ fontSize: "12px", color: "var(--dim)", fontFamily: mono }}>
             implied volatility change by strike and date
             {data?.spot ? ` · spot ${data.spot.toLocaleString()}` : ""}
           </p>
@@ -73,18 +73,18 @@ export default function IVSurfaceTab() {
             <button key={t} onClick={() => setTicker(t)} style={{
               padding: "6px 14px", fontSize: "11px", letterSpacing: "0.1em",
               fontFamily: mono,
-              border: `0.5px solid ${ticker === t ? "#00c896" : "#1a1a1a"}`,
+              border: `0.5px solid ${ticker === t ? "#00c896" : "var(--border)"}`,
               background: ticker === t ? "rgba(0,200,150,0.08)" : "transparent",
-              color: ticker === t ? "#00c896" : "#444",
+              color: ticker === t ? "#00c896" : "var(--dim)",
               cursor: "pointer", borderRadius: "4px"
             }}>{t}</button>
           ))}
         </div>
       </div>
 
-      <div style={{ border: "0.5px solid #1a1a1a", borderRadius: "8px", background: "#080808", overflow: "hidden" }}>
+      <div style={{ border: "0.5px solid #1a1a1a", borderRadius: "8px", background: "var(--surface)", overflow: "hidden" }}>
         {loading && (
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "#444", fontSize: "12px", padding: "80px 0", justifyContent: "center", fontFamily: mono }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "var(--dim)", fontSize: "12px", padding: "80px 0", justifyContent: "center", fontFamily: mono }}>
             <div style={{ width: "5px", height: "5px", background: "#00c896", borderRadius: "50%" }} />
             loading {ticker} net iv...
           </div>
@@ -93,8 +93,8 @@ export default function IVSurfaceTab() {
 
         {data && !loading && data.status === "building_history" && (
           <div style={{ padding: "40px", textAlign: "center" }}>
-            <p style={{ fontSize: "13px", color: "#555", fontFamily: mono, marginBottom: "8px" }}>building history...</p>
-            <p style={{ fontSize: "11px", color: "#333", fontFamily: mono }}>first snapshot taken · check back tomorrow for daily changes</p>
+            <p style={{ fontSize: "13px", color: "var(--dim)", fontFamily: mono, marginBottom: "8px" }}>building history...</p>
+            <p style={{ fontSize: "11px", color: "var(--muted)", fontFamily: mono }}>first snapshot taken · check back tomorrow for daily changes</p>
           </div>
         )}
 
@@ -103,11 +103,11 @@ export default function IVSurfaceTab() {
             <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: mono, fontSize: "11px" }}>
               <thead>
                 <tr style={{ borderBottom: "0.5px solid #1a1a1a" }}>
-                  <th style={{ padding: "10px 16px", textAlign: "right", color: "#333", fontWeight: 400, letterSpacing: "0.1em", fontSize: "10px", position: "sticky", left: 0, background: "#080808", borderRight: "0.5px solid #111" }}>
+                  <th style={{ padding: "10px 16px", textAlign: "right", color: "var(--muted)", fontWeight: 400, letterSpacing: "0.1em", fontSize: "10px", position: "sticky", left: 0, background: "var(--surface)", borderRight: "0.5px solid #111" }}>
                     STRIKE
                   </th>
                   {data.dates.map(d => (
-                    <th key={d} style={{ padding: "10px 12px", textAlign: "center", color: "#333", fontWeight: 400, letterSpacing: "0.05em", fontSize: "10px", minWidth: "64px" }}>
+                    <th key={d} style={{ padding: "10px 12px", textAlign: "center", color: "var(--muted)", fontWeight: 400, letterSpacing: "0.05em", fontSize: "10px", minWidth: "64px" }}>
                       {fmtDate(d)}
                     </th>
                   ))}
@@ -122,9 +122,9 @@ export default function IVSurfaceTab() {
                       background: isATM ? "rgba(0,200,150,0.04)" : ri % 2 === 0 ? "transparent" : "rgba(255,255,255,0.01)"
                     }}>
                       <td style={{
-                        padding: "7px 16px", textAlign: "right", color: isATM ? "#00c896" : "#555",
+                        padding: "7px 16px", textAlign: "right", color: isATM ? "#00c896" : "var(--dim)",
                         fontWeight: isATM ? 500 : 400, position: "sticky", left: 0,
-                        background: isATM ? "rgba(0,200,150,0.06)" : ri % 2 === 0 ? "#080808" : "#090909",
+                        background: isATM ? "rgba(0,200,150,0.06)" : ri % 2 === 0 ? "var(--surface)" : "#090909",
                         borderRight: "0.5px solid #111"
                       }}>
                         {row.strike.toLocaleString()}
@@ -133,14 +133,14 @@ export default function IVSurfaceTab() {
                       {data.dates.map(d => {
                         const v = row.values[d]
                         if (!v) return (
-                          <td key={d} style={{ padding: "7px 12px", textAlign: "center", color: "#1a1a1a" }}>—</td>
+                          <td key={d} style={{ padding: "7px 12px", textAlign: "center", color: "var(--border)" }}>—</td>
                         )
                         return (
                           <td key={d} style={{ padding: "7px 12px", textAlign: "center" }}>
                             <div style={{ color: changeColor(v.change), fontWeight: v.change !== null && Math.abs(v.change) > 0.01 ? 500 : 400 }}>
                               {fmt(v.change)}
                             </div>
-                            <div style={{ fontSize: "9px", color: "#2a2a2a", marginTop: "1px" }}>
+                            <div style={{ fontSize: "9px", color: "var(--muted)", marginTop: "1px" }}>
                               {(v.iv * 100).toFixed(1)}%
                             </div>
                           </td>
@@ -155,7 +155,7 @@ export default function IVSurfaceTab() {
         )}
       </div>
 
-      <div style={{ display: "flex", gap: "24px", fontSize: "10px", color: "#333", fontFamily: mono }}>
+      <div style={{ display: "flex", gap: "24px", fontSize: "10px", color: "var(--muted)", fontFamily: mono }}>
         <span>· value = daily IV change</span>
         <span>· <span style={{ color: "#00c896" }}>green = IV falling</span> · <span style={{ color: "#ff5555" }}>red = IV rising</span></span>
         <span>· small number = raw IV level</span>

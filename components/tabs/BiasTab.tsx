@@ -17,7 +17,7 @@ interface Props {
 const WEIGHTS: Record<string, number> = { topology: 0.30, gex: 0.25, reserves_rrp: 0.20, oas: 0.10, walcl: 0.10, auction: 0.05 }
 const LABELS: Record<string, string> = { topology: "topology", gex: "gex", reserves_rrp: "reserves / rrp", oas: "oas", walcl: "walcl", auction: "auction" }
 
-const DIR_COLOR: Record<string, string> = { BULLISH: "#00c896", BEARISH: "#ff5555", NEUTRAL: "#f0c040", "NO TRADE": "#444" }
+const DIR_COLOR: Record<string, string> = { BULLISH: "#00c896", BEARISH: "#ff5555", NEUTRAL: "#f0c040", "NO TRADE": "var(--dim)" }
 
 function ScoreArc({ score, direction }: { score: number; direction: string }) {
   const color = DIR_COLOR[direction] || "#666"
@@ -60,7 +60,7 @@ function ScoreArc({ score, direction }: { score: number; direction: string }) {
       {/* Background arc */}
       <path
         d={`M ${bgX1} ${bgY1} A ${r} ${r} 0 1 1 ${bgX2} ${bgY2}`}
-        fill="none" stroke="#1a1a1a" strokeWidth={strokeW} strokeLinecap="round"
+        fill="none" stroke="var(--border)" strokeWidth={strokeW} strokeLinecap="round"
       />
 
       {/* Score arc */}
@@ -86,14 +86,14 @@ function ScoreArc({ score, direction }: { score: number; direction: string }) {
           <line key={v}
             x1={cx + inner * Math.cos(tickRad)} y1={cy + inner * Math.sin(tickRad)}
             x2={cx + outer * Math.cos(tickRad)} y2={cy + outer * Math.sin(tickRad)}
-            stroke="#2a2a2a" strokeWidth="1"
+            stroke="var(--muted)" strokeWidth="1"
           />
         )
       })}
 
       {/* Labels */}
-      <text x={cx + (r + 18) * Math.cos(toRad(startAngle))} y={cy + (r + 18) * Math.sin(toRad(startAngle))} textAnchor="middle" fill="#333" fontSize="8" fontFamily="JetBrains Mono, monospace">-1</text>
-      <text x={cx + (r + 18) * Math.cos(toRad(endAngle))} y={cy + (r + 18) * Math.sin(toRad(endAngle))} textAnchor="middle" fill="#333" fontSize="8" fontFamily="JetBrains Mono, monospace">+1</text>
+      <text x={cx + (r + 18) * Math.cos(toRad(startAngle))} y={cy + (r + 18) * Math.sin(toRad(startAngle))} textAnchor="middle" fill="var(--muted)" fontSize="8" fontFamily="JetBrains Mono, monospace">-1</text>
+      <text x={cx + (r + 18) * Math.cos(toRad(endAngle))} y={cy + (r + 18) * Math.sin(toRad(endAngle))} textAnchor="middle" fill="var(--muted)" fontSize="8" fontFamily="JetBrains Mono, monospace">+1</text>
     </svg>
   )
 }
@@ -105,7 +105,7 @@ export default function BiasTab({ bias }: Props) {
     return (
       <div style={{ border: "0.5px solid rgba(255,85,85,0.2)", background: "rgba(255,85,85,0.03)", borderRadius: "8px", padding: "40px", textAlign: "center" }}>
         <p style={{ fontSize: "24px", fontWeight: 600, color: "#ff5555", letterSpacing: "0.1em" }}>NO TRADE</p>
-        <p style={{ fontSize: "12px", color: "#444", marginTop: "12px" }}>{bias.kill_reason}</p>
+        <p style={{ fontSize: "12px", color: "var(--dim)", marginTop: "12px" }}>{bias.kill_reason}</p>
       </div>
     )
   }
@@ -114,26 +114,26 @@ export default function BiasTab({ bias }: Props) {
     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
 
       {/* main bias card */}
-      <div style={{ border: `0.5px solid ${color}22`, background: "#0d0d0d", borderRadius: "8px", padding: "32px", display: "grid", gridTemplateColumns: "1fr auto", gap: "32px", alignItems: "center" }}>
+      <div style={{ border: `0.5px solid ${color}22`, background: "var(--surface)", borderRadius: "8px", padding: "32px", display: "grid", gridTemplateColumns: "1fr auto", gap: "32px", alignItems: "center" }}>
         <div>
           {/* direction */}
-          <p style={{ fontSize: "10px", letterSpacing: "0.3em", color: "#333", textTransform: "uppercase", marginBottom: "12px", fontFamily: "JetBrains Mono, monospace" }}>
+          <p style={{ fontSize: "10px", letterSpacing: "0.3em", color: "var(--muted)", textTransform: "uppercase", marginBottom: "12px", fontFamily: "JetBrains Mono, monospace" }}>
             nightly bias
           </p>
           <p style={{ fontSize: "clamp(48px, 6vw, 72px)", fontWeight: 600, color, letterSpacing: "-0.02em", lineHeight: 1, marginBottom: "16px", fontFamily: "JetBrains Mono, monospace" }}>
             {bias.direction}
           </p>
-          <p style={{ fontSize: "12px", color: "#444", lineHeight: 1.7, maxWidth: "480px", marginBottom: "28px" }}>
+          <p style={{ fontSize: "12px", color: "var(--dim)", lineHeight: 1.7, maxWidth: "480px", marginBottom: "28px" }}>
             {bias.narrative}
           </p>
 
           {/* conviction bar */}
           <div style={{ marginBottom: "24px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
-              <span style={{ fontSize: "10px", letterSpacing: "0.2em", color: "#333", textTransform: "uppercase" }}>conviction</span>
+              <span style={{ fontSize: "10px", letterSpacing: "0.2em", color: "var(--muted)", textTransform: "uppercase" }}>conviction</span>
               <span style={{ fontSize: "10px", color, fontFamily: "JetBrains Mono, monospace" }}>{bias.conviction.toFixed(0)}%</span>
             </div>
-            <div style={{ height: "2px", background: "#111", borderRadius: "1px", overflow: "hidden" }}>
+            <div style={{ height: "2px", background: "var(--border)", borderRadius: "1px", overflow: "hidden" }}>
               <div style={{ height: "100%", width: `${bias.conviction}%`, background: color, borderRadius: "1px", transition: "width 0.8s ease" }} />
             </div>
           </div>
@@ -146,7 +146,7 @@ export default function BiasTab({ bias }: Props) {
               { label: "size factor", value: `${(bias.size_factor * 100).toFixed(0)}%` },
             ].map(({ label, value }) => (
               <div key={label}>
-                <p style={{ fontSize: "9px", letterSpacing: "0.25em", color: "#333", textTransform: "uppercase", marginBottom: "6px" }}>{label}</p>
+                <p style={{ fontSize: "9px", letterSpacing: "0.25em", color: "var(--muted)", textTransform: "uppercase", marginBottom: "6px" }}>{label}</p>
                 <p style={{ fontSize: "14px", fontWeight: 500, color: "#e8e8e8", fontFamily: "JetBrains Mono, monospace" }}>{value}</p>
               </div>
             ))}
@@ -156,14 +156,14 @@ export default function BiasTab({ bias }: Props) {
         {/* arc gauge */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
           <ScoreArc score={bias.score} direction={bias.direction} />
-          <p style={{ fontSize: "9px", letterSpacing: "0.2em", color: "#333", textTransform: "uppercase" }}>signal score</p>
+          <p style={{ fontSize: "9px", letterSpacing: "0.2em", color: "var(--muted)", textTransform: "uppercase" }}>signal score</p>
         </div>
       </div>
 
       {/* layer votes */}
-      <div style={{ border: "0.5px solid #1a1a1a", background: "#0d0d0d", borderRadius: "8px", padding: "24px" }}>
-        <p style={{ fontSize: "9px", letterSpacing: "0.3em", color: "#333", textTransform: "uppercase", marginBottom: "6px" }}>layer breakdown</p>
-        <p style={{ fontSize: "11px", color: "#2a2a2a", marginBottom: "20px", lineHeight: 1.6 }}>
+      <div style={{ border: "0.5px solid #1a1a1a", background: "var(--surface)", borderRadius: "8px", padding: "24px" }}>
+        <p style={{ fontSize: "9px", letterSpacing: "0.3em", color: "var(--muted)", textTransform: "uppercase", marginBottom: "6px" }}>layer breakdown</p>
+        <p style={{ fontSize: "11px", color: "var(--muted)", marginBottom: "20px", lineHeight: 1.6 }}>
           each layer votes bullish (+) or bearish (−) and is weighted by importance. the final score is the weighted sum, scaled by entropy.
         </p>
         <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
@@ -184,30 +184,30 @@ export default function BiasTab({ bias }: Props) {
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "4px" }}>
                   <span style={{ fontSize: "11px", color: "#666", fontFamily: "JetBrains Mono, monospace" }}>{LABELS[key]}</span>
                   <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-                    <span style={{ fontSize: "10px", color: "#2a2a2a" }}>wt {(weight * 100).toFixed(0)}%</span>
+                    <span style={{ fontSize: "10px", color: "var(--muted)" }}>wt {(weight * 100).toFixed(0)}%</span>
                     <span style={{ fontSize: "11px", fontFamily: "JetBrains Mono, monospace", color: vc, minWidth: "44px", textAlign: "right" }}>
                       {vote >= 0 ? "+" : ""}{vote.toFixed(2)}
                     </span>
-                    <span style={{ fontSize: "10px", color: "#2a2a2a", fontFamily: "JetBrains Mono, monospace", minWidth: "52px", textAlign: "right" }}>
+                    <span style={{ fontSize: "10px", color: "var(--muted)", fontFamily: "JetBrains Mono, monospace", minWidth: "52px", textAlign: "right" }}>
                       {contribution >= 0 ? "+" : ""}{contribution.toFixed(3)}
                     </span>
                   </div>
                 </div>
-                <div style={{ height: "1px", background: "#111", borderRadius: "1px", overflow: "hidden", marginBottom: "6px" }}>
+                <div style={{ height: "1px", background: "var(--border)", borderRadius: "1px", overflow: "hidden", marginBottom: "6px" }}>
                   <div style={{ height: "100%", width: `${Math.abs(vote) * 100}%`, background: vc, borderRadius: "1px" }} />
                 </div>
-                <p style={{ fontSize: "10px", color: "#2a2a2a", lineHeight: 1.6 }}>{desc}</p>
+                <p style={{ fontSize: "10px", color: "var(--muted)", lineHeight: 1.6 }}>{desc}</p>
               </div>
             )
           })}
         </div>
 
         {/* score math */}
-        <div style={{ marginTop: "20px", padding: "14px", background: "#080808", borderRadius: "6px", border: "0.5px solid #161616" }}>
-          <p style={{ fontSize: "9px", letterSpacing: "0.2em", color: "#2a2a2a", textTransform: "uppercase", marginBottom: "10px" }}>how the score is calculated</p>
-          <p style={{ fontSize: "11px", color: "#2a2a2a", lineHeight: 1.8 }}>
+        <div style={{ marginTop: "20px", padding: "14px", background: "var(--surface)", borderRadius: "6px", border: "0.5px solid #161616" }}>
+          <p style={{ fontSize: "9px", letterSpacing: "0.2em", color: "var(--muted)", textTransform: "uppercase", marginBottom: "10px" }}>how the score is calculated</p>
+          <p style={{ fontSize: "11px", color: "var(--muted)", lineHeight: 1.8 }}>
             score = Σ(layer vote × weight) × entropy factor<br />
-            <span style={{ color: "#222" }}>
+            <span style={{ color: "var(--muted)" }}>
               if score &gt; 0.25 → BULLISH · if score &lt; −0.25 → BEARISH · otherwise NEUTRAL<br />
               conviction = |score| × 100 · size rule scales down when entropy is elevated or topology is near a regime boundary
             </span>
