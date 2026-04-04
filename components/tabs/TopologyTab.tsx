@@ -19,6 +19,12 @@ const REGIME_COLOR: Record<string, string> = {
 }
 const ENT_COLOR: Record<string, string> = { NORMAL: "var(--bull)", ELEVATED: "var(--warn)", CRITICAL: "var(--bear)" }
 
+const AXIS_STYLE = (label: string) => ({
+  title: { text: label, font: { family: "JetBrains Mono", size: 9, color: "#44445a" } },
+  gridcolor: "#1e1e2e",
+  tickfont: { family: "JetBrains Mono", size: 8, color: "#44445a" },
+})
+
 export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
   const [hist, setHist] = useState<HistData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -34,13 +40,19 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
   }, [])
 
   const stats = [
-    { label: "regime", value: t.regime, color: rc },
-    { label: "pca1 trend", value: `${t.pca1 >= 0 ? "+" : ""}${t.pca1.toFixed(3)}`, color: t.pca1 > 1 ? "var(--bull)" : t.pca1 < -1 ? "var(--bear)" : "var(--muted)" },
-    { label: "pca2 momentum", value: `${t.pca2 >= 0 ? "+" : ""}${t.pca2.toFixed(3)}`, color: t.aligned ? "var(--bull)" : "var(--warn)" },
-    { label: "vol z-score", value: `${t.vol_z >= 0 ? "+" : ""}${t.vol_z.toFixed(3)}`, color: t.vol_z > 1.5 ? "var(--bear)" : t.vol_z > 0.5 ? "var(--warn)" : "var(--muted)" },
-    { label: "entropy", value: `${e.rho.toFixed(3)}×`, color: ec },
-    { label: "size rule", value: e.status === "CRITICAL" ? "NO TRADE" : e.status === "ELEVATED" ? "HALF SIZE" : "FULL SIZE", color: e.status === "CRITICAL" ? "var(--bear)" : e.status === "ELEVATED" ? "var(--warn)" : "var(--bull)" },
+    { label: "regime",       value: t.regime, color: rc },
+    { label: "pca1 trend",   value: `${t.pca1 >= 0 ? "+" : ""}${t.pca1.toFixed(3)}`, color: t.pca1 > 1 ? "var(--bull)" : t.pca1 < -1 ? "var(--bear)" : "var(--muted)" },
+    { label: "pca2 momentum",value: `${t.pca2 >= 0 ? "+" : ""}${t.pca2.toFixed(3)}`, color: t.aligned ? "var(--bull)" : "var(--warn)" },
+    { label: "vol z-score",  value: `${t.vol_z >= 0 ? "+" : ""}${t.vol_z.toFixed(3)}`, color: t.vol_z > 1.5 ? "var(--bear)" : t.vol_z > 0.5 ? "var(--warn)" : "var(--muted)" },
+    { label: "entropy",      value: `${e.rho.toFixed(3)}×`, color: ec },
+    { label: "size rule",    value: e.status === "CRITICAL" ? "NO TRADE" : e.status === "ELEVATED" ? "HALF SIZE" : "FULL SIZE", color: e.status === "CRITICAL" ? "var(--bear)" : e.status === "ELEVATED" ? "var(--warn)" : "var(--bull)" },
   ]
+
+  const layoutBase = {
+    paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+    margin: { l: 0, r: 0, t: 0, b: 0 },
+    dragmode: "orbit" as const,
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
@@ -55,10 +67,57 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
         ))}
       </div>
 
-      {/* Phase space */}
+      {/* 1: Topology phase space scatter — PCA1 x PCA2 x Vol Z, colored by entropy */}
       {!loading && hist && !hist.error && (
-        <div style={{ background: "var(--surface)", border: "1px solid var(--border)", overflow: "hidden" }}>
-          <div style={{ padding: "10px 20px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ background: "rgba(0,0,0,0)", border: "1px solid var(--border)", overflow: "hidden" }}>
+          <div style={{ padding: "10px 20px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between" }}>
+            <span style={{ fontSize: "9px", letterSpacing: "0.2em", color: "var(--muted)", textTransform: "uppercase" }}>phase space · pca1 × pca2 × vol z · drag to rotate</span>
+            <span style={{ fontSize: "9px", color: "var(--muted)" }}>{hist.n} sessions</span>
+          </div>
+          <Plot
+            data={[
+              {
+                type: "scatter3d" as const,
+                x: hist.pca1.slice(0, -1), y: hist.pca2.slice(0, -1), z: hist.vol_z.slice(0, -1),
+                mode: "markers" as const,
+                marker: {
+                  size: 3, opacity: 0.55,
+                  color: hist.entropy.slice(0, -1).map((v: number, i: number) => v / (hist.threshold[i] || 1)),
+                  colorscale: [[0, "#00c896"], [0.6, "#e8b84b"], [1.0, "#ff4466"]] as any,
+                  cmin: 0, cmax: 1.3, showscale: false,
+                },
+                hoverinfo: "skip" as const,
+              },
+              {
+                type: "scatter3d" as const,
+                x: [t.pca1], y: [t.pca2], z: [t.vol_z],
+                mode: "markers" as const,
+                marker: { size: 10, color: "#f97316", line: { color: "#fff", width: 1 } },
+                hovertemplate: `trend: ${t.pca1.toFixed(3)}<br>momentum: ${t.pca2.toFixed(3)}<br>vol z: ${t.vol_z.toFixed(3)}<extra>now</extra>`,
+                showlegend: false,
+              }
+            ]}
+            layout={{
+              ...layoutBase,
+              scene: {
+                bgcolor: "rgba(0,0,0,0)",
+                xaxis: AXIS_STYLE("PCA1 Trend"),
+                yaxis: AXIS_STYLE("PCA2 Mom"),
+                zaxis: AXIS_STYLE("Vol Z"),
+                camera: { eye: { x: 1.6, y: -1.6, z: 1.1 } }
+              },
+            } as any}
+            config={{ displayModeBar: false, responsive: true, scrollZoom: true }}
+            style={{ width: "100%", height: "420px" }}
+            useResizeHandler
+          />
+        </div>
+      )}
+
+      {/* 2: Structural history lines — PCA1, PCA2, Vol Z over time */}
+      {!loading && hist && !hist.error && (
+        <div style={{ background: "rgba(0,0,0,0)", border: "1px solid var(--border)", overflow: "hidden" }}>
+          <div style={{ padding: "10px 20px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between" }}>
             <span style={{ fontSize: "9px", letterSpacing: "0.2em", color: "var(--muted)", textTransform: "uppercase" }}>structural history · trend · momentum · vol z-score · drag to rotate</span>
             <span style={{ fontSize: "9px", color: "var(--muted)" }}>{hist.n} sessions</span>
           </div>
@@ -67,17 +126,15 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
               {
                 type: "scatter3d" as const,
                 x: Array.from({ length: hist.pca1.length }, (_, i) => i),
-                y: hist.pca1,
-                z: hist.pca2,
+                y: hist.pca1, z: hist.pca2,
                 mode: "lines" as const,
                 line: { color: "#00c896", width: 2 },
                 name: "PCA1 Trend",
               },
               {
                 type: "scatter3d" as const,
-                x: Array.from({ length: hist.vol_z.length }, (_, i) => i),
-                y: hist.vol_z,
-                z: hist.pca2,
+                x: Array.from({ length: hist.pca2.length }, (_, i) => i),
+                y: hist.pca2, z: hist.vol_z,
                 mode: "lines" as const,
                 line: { color: "#4488ff", width: 2 },
                 name: "PCA2 Momentum",
@@ -85,34 +142,28 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
               {
                 type: "scatter3d" as const,
                 x: Array.from({ length: hist.vol_z.length }, (_, i) => i),
-                y: hist.vol_z,
-                z: hist.pca1,
+                y: hist.vol_z, z: hist.pca1,
                 mode: "lines" as const,
                 line: { color: "#e8b84b", width: 2 },
                 name: "Vol Z",
               },
               {
                 type: "scatter3d" as const,
-                x: [hist.pca1.length - 1],
-                y: [t.pca1],
-                z: [t.pca2],
+                x: [hist.pca1.length - 1], y: [t.pca1], z: [t.pca2],
                 mode: "markers" as const,
                 marker: { size: 8, color: "#f97316", line: { color: "#fff", width: 1 } },
-                name: "now",
                 showlegend: false,
               }
             ]}
             layout={{
-              paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
-              margin: { l: 0, r: 0, t: 0, b: 0 },
+              ...layoutBase,
               scene: {
                 bgcolor: "rgba(0,0,0,0)",
-                xaxis: { title: { text: "Time", font: { family: "JetBrains Mono", size: 9, color: "#44445a" } }, gridcolor: "#1e1e2e", tickfont: { family: "JetBrains Mono", size: 8, color: "#44445a" } },
-                yaxis: { title: { text: "Trend (PCA1)", font: { family: "JetBrains Mono", size: 9, color: "#44445a" } }, gridcolor: "#1e1e2e", tickfont: { family: "JetBrains Mono", size: 8, color: "#44445a" } },
-                zaxis: { title: { text: "Momentum (PCA2)", font: { family: "JetBrains Mono", size: 9, color: "#44445a" } }, gridcolor: "#1e1e2e", tickfont: { family: "JetBrains Mono", size: 8, color: "#44445a" } },
+                xaxis: AXIS_STYLE("Time"),
+                yaxis: AXIS_STYLE("Trend (PCA1)"),
+                zaxis: AXIS_STYLE("Momentum (PCA2)"),
                 camera: { eye: { x: 1.6, y: -1.6, z: 1.1 } }
               },
-              dragmode: "orbit"
             } as any}
             config={{ displayModeBar: false, responsive: true, scrollZoom: true }}
             style={{ width: "100%", height: "420px" }}
@@ -120,7 +171,6 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
           />
         </div>
       )}
-
 
       {loading && (
         <div style={{ background: "var(--surface)", border: "1px solid var(--border)", padding: "32px", display: "flex", alignItems: "center", gap: "8px", color: "var(--muted)", fontSize: "11px" }}>
@@ -129,63 +179,7 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
         </div>
       )}
 
-
-
-
-      {/* 3D Entropy Manifold */}
-      {!loading && hist && !hist.error && (
-        <div style={{ background: "rgba(0,0,0,0)", border: "1px solid var(--border)", overflow: "hidden" }}>
-          <div style={{ padding: "10px 20px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between" }}>
-            <span style={{ fontSize: "9px", letterSpacing: "0.2em", color: "var(--muted)", textTransform: "uppercase" }}>entropy manifold · pca1 × pca2 × entropy · drag to rotate</span>
-            <span style={{ fontSize: "9px", color: "var(--muted)" }}>{hist.n} sessions</span>
-          </div>
-          <Plot
-            data={[
-              {
-                type: "scatter3d" as const,
-                x: hist.pca1.slice(0, -1),
-                y: hist.pca2.slice(0, -1),
-                z: hist.entropy.slice(0, -1),
-                mode: "markers" as const,
-                marker: {
-                  size: 3,
-                  opacity: 0.6,
-                  color: hist.entropy.slice(0, -1).map((v: number, i: number) => v / (hist.threshold[i] || 1)),
-                  colorscale: [[0, "#00c896"], [0.6, "#e8b84b"], [1.0, "#ff4466"]] as any,
-                  cmin: 0, cmax: 1.5,
-                  showscale: false,
-                },
-                hoverinfo: "skip" as const,
-              },
-              {
-                type: "scatter3d" as const,
-                x: [t.pca1], y: [t.pca2], z: [e.entropy],
-                mode: "markers" as const,
-                marker: { size: 10, color: "#f97316", line: { color: "#fff", width: 1 } },
-                hovertemplate: `pca1: ${t.pca1.toFixed(3)}<br>pca2: ${t.pca2.toFixed(3)}<br>entropy: ${e.entropy.toFixed(5)}<extra>now</extra>`,
-                showlegend: false,
-              }
-            ]}
-            layout={{
-              paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
-              margin: { l: 0, r: 0, t: 0, b: 0 },
-              scene: {
-                bgcolor: "rgba(0,0,0,0)",
-                xaxis: { title: { text: "Time", font: { family: "JetBrains Mono", size: 9, color: "#44445a" } }, gridcolor: "#1e1e2e", tickfont: { family: "JetBrains Mono", size: 8, color: "#44445a" } },
-                yaxis: { title: { text: "Trend (PCA1)", font: { family: "JetBrains Mono", size: 9, color: "#44445a" } }, gridcolor: "#1e1e2e", tickfont: { family: "JetBrains Mono", size: 8, color: "#44445a" } },
-                zaxis: { title: { text: "Entropy", font: { family: "JetBrains Mono", size: 9, color: "#44445a" } }, gridcolor: "#1e1e2e", tickfont: { family: "JetBrains Mono", size: 8, color: "#44445a" } },
-                camera: { eye: { x: 1.6, y: -1.6, z: 1.1 } }
-              },
-              dragmode: "orbit"
-            } as any}
-            config={{ displayModeBar: false, responsive: true, scrollZoom: true }}
-            style={{ width: "100%", height: "420px" }}
-            useResizeHandler
-          />
-        </div>
-      )}
-
-      {/* Entropy */}
+      {/* Entropy stats */}
       <div style={{ background: "var(--surface)", border: "1px solid var(--border)", display: "grid", gridTemplateColumns: "1fr 1fr" }}>
         <div style={{ padding: "20px 24px", borderRight: "1px solid var(--border)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
@@ -216,7 +210,6 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
             </p>
           </div>
         </div>
-
         <div style={{ padding: "20px 24px" }}>
           <span style={{ fontSize: "9px", letterSpacing: "0.2em", color: "var(--muted)", textTransform: "uppercase", display: "block", marginBottom: "16px" }}>what this means</span>
           {[
