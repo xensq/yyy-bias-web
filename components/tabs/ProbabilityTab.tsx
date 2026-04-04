@@ -97,7 +97,7 @@ export default function ProbabilityTab() {
               </span>
               <span style={{ fontSize: "10px", color: "var(--muted)" }}>spot {data.spot.toLocaleString()} · iv-adjusted log-normal</span>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr auto" }}>
+            <div style={{ display: "flex", alignItems: "stretch" }}>
               {/* Main heatmap */}
               <Plot
                 data={[
@@ -181,24 +181,26 @@ export default function ProbabilityTab() {
                 ]}
                 layout={{
                   paper_bgcolor: "transparent", plot_bgcolor: "#050510",
-                  margin: { l: 60, r: 20, t: 10, b: 40 },
+                  margin: { l: 70, r: 80, t: 20, b: 50 },
                   xaxis: {
-                    title: { text: "Trading Days Forward", font: { family: "JetBrains Mono", size: 9, color: "#444" } },
+                    title: { text: "Trading Days Forward", font: { family: "JetBrains Mono", size: 9, color: "#555" } },
                     tickvals: [1,2,3,4,5],
-                    ticktext: ["D1", "D2", "D3", "D4", "D5"],
+                    ticktext: ["Mon", "Tue", "Wed", "Thu", "Fri"],
                     tickfont: { family: "JetBrains Mono", size: 9, color: "#555" },
                     gridcolor: "rgba(255,255,255,0.03)", zeroline: false,
+                    range: [0.5, 5.5],
                   },
                   yaxis: {
                     tickfont: { family: "JetBrains Mono", size: 9, color: "#555" },
-                    gridcolor: "rgba(255,255,255,0.03)", zeroline: false,
+                    gridcolor: "rgba(255,255,255,0.04)", zeroline: false,
                     tickformat: ",.0f",
                   },
-                  legend: { font: { family: "JetBrains Mono", size: 9, color: "#555" }, bgcolor: "transparent", x: 0.01, y: 0.99 },
+                  legend: { font: { family: "JetBrains Mono", size: 9, color: "#555" }, bgcolor: "rgba(5,5,16,0.8)", x: 0.01, y: 0.99, bordercolor: "rgba(255,255,255,0.06)", borderwidth: 1 },
                   showlegend: true,
+                  autosize: true,
                 } as any}
                 config={{ displayModeBar: false, responsive: true }}
-                style={{ width: "100%", height: "420px" }}
+                style={{ width: "100%", height: "460px" }}
                 useResizeHandler
               />
               {/* Terminal distribution — sideways */}
@@ -220,19 +222,19 @@ export default function ProbabilityTab() {
                 ]}
                 layout={{
                   paper_bgcolor: "transparent", plot_bgcolor: "#050510",
-                  margin: { l: 4, r: 8, t: 10, b: 40 },
-                  width: 110,
+                  margin: { l: 4, r: 55, t: 20, b: 50 },
+                  width: 160,
                   xaxis: { visible: false, zeroline: false },
                   yaxis: {
                     tickfont: { family: "JetBrains Mono", size: 8, color: "#444" },
                     gridcolor: "transparent", zeroline: false, tickformat: ",.0f",
                     side: "right" as const,
                   },
-                  bargap: 0.05,
-                  title: { text: "terminal", font: { family: "JetBrains Mono", size: 8, color: "#333" }, x: 0.5 },
+                  bargap: 0.02,
+                  annotations: [{ text: "terminal", x: 0.5, y: 1.02, xref: "paper", yref: "paper", showarrow: false, font: { family: "JetBrains Mono", size: 8, color: "#333" } }],
                 } as any}
                 config={{ displayModeBar: false, responsive: false }}
-                style={{ height: "420px", width: "110px" }}
+                style={{ height: "460px", width: "160px" }}
               />
             </div>
           </div>
