@@ -1,5 +1,5 @@
 "use client"
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect } from "react"
 import { StrikeData } from "@/lib/api"
 
 interface GexProps {
@@ -15,6 +15,16 @@ export default function GexTab({ gex: g }: GexProps) {
   const [hovered, setHovered] = useState<{ strike: number; call_gex: number; put_gex: number; net: number; x: number; y: number } | null>(null)
 
   if (g.error) return <div style={{ color: "#ff5555", fontSize: "12px", marginTop: "16px" }}>{g.error}</div>
+
+  useEffect(() => {
+    if (ticker === "SPX") { setG(initialGex); return }
+    setLoading(true)
+    fetch(`${API}/gex?ticker=${ticker}`)
+      .then(r => r.json())
+      .then(setG)
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [ticker])
 
   const strikes = useMemo(() => {
     if (!g.strike_data?.length) return []
@@ -56,7 +66,22 @@ export default function GexTab({ gex: g }: GexProps) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-      {/* summary row */}
+      {/* ticker + summary row */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "4px" }}>
+        <div style={{ display: "flex", gap: "6px" }}>
+          {TICKERS.map(t => (
+            <button key={t} onClick={() => setTicker(t)}
+              style={{ padding: "5px 12px", border: `0.5px solid ${ticker === t ? "var(--accent)" : "var(--border)"}`,
+                background: ticker === t ? "var(--accent-dim)" : "transparent",
+                color: ticker === t ? "var(--accent)" : "var(--muted)", fontSize: "10px",
+                letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer",
+                fontFamily: "inherit", borderRadius: "3px", transition: "all 0.15s" }}>
+              {t}
+            </button>
+          ))}
+        </div>
+        {loading && <span style={{ fontSize: "10px", color: "var(--muted)" }}>loading...</span>}
+      </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px" }}>
         {[
           { label: "gamma env",      value: g.gamma_env,           color: g.positive_gamma ? "var(--bull)" : "var(--bear)" },
