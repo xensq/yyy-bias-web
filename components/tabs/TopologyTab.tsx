@@ -336,14 +336,19 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
               <span style={{ fontSize: "9px", letterSpacing: "0.25em", color: "#333", textTransform: "uppercase" }}>entropy — {e.status}</span>
               <span style={{ fontSize: "12px", fontFamily: "JetBrains Mono, monospace", color: ENT_COLOR[e.status] || "#666", fontWeight: 500 }}>{e.rho.toFixed(3)}× threshold</span>
             </div>
-            <EntropyLineChart entropy={hist.entropy} threshold={hist.threshold} />
-            <div style={{ display: "flex", gap: "20px", marginTop: "8px" }}>
+            <div style={{ display: "flex", gap: "20px", marginBottom: "10px" }}>
               <span style={{ fontSize: "10px", color: "#333" }}>current {e.entropy.toFixed(5)}</span>
               <span style={{ fontSize: "10px", color: "#555" }}>threshold {e.threshold.toFixed(5)}</span>
               <span style={{ fontSize: "10px", color: e.trend === "rising" ? "#f0c040" : "#555" }}>
                 {e.trend === "rising" ? "↑ rising into close" : "↓ falling into close"}
               </span>
             </div>
+            <p style={{ fontSize: "10px", color: "#333", marginTop: "4px" }}>
+              {e.status === "CRITICAL" ? "entropy critical — signal noise high, reduce size or stand aside" :
+               e.status === "ELEVATED" ? "entropy elevated — conflicting signals, trade smaller" :
+               e.rho < 0.5 ? "entropy very low — market highly ordered, signals reliable" :
+               "entropy normal — information flow stable, signals reliable"}
+            </p>
           </div>
 
                 </>

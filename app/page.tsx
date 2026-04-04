@@ -17,11 +17,30 @@ export default function Landing() {
     resize()
     window.addEventListener("resize", resize)
 
+    // Stars
+    const stars = Array.from({ length: 120 }, () => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      r: Math.random() * 1.2 + 0.2,
+      speed: Math.random() * 0.15 + 0.03,
+      opacity: Math.random() * 0.4 + 0.1
+    }))
+
     let t = 0
 
     const draw = () => {
       const W = canvas.width, H = canvas.height
       ctx.clearRect(0, 0, W, H)
+
+      // Stars
+      stars.forEach(s => {
+        s.y -= s.speed
+        if (s.y < 0) { s.y = H; s.x = Math.random() * W }
+        ctx.beginPath()
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(0,200,150,${s.opacity * (0.6 + 0.4 * Math.sin(t * 0.02 + s.x))})`
+        ctx.fill()
+      })
 
       // Animated grid
       const COLS = Math.ceil(W / 80) + 1

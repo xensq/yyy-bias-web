@@ -16,7 +16,10 @@ export default function GexTab({ gex: g }: GexProps) {
 
   const strikes = useMemo(() => {
     if (!g.strike_data?.length) return []
-    return [...g.strike_data].sort((a, b) => b.strike - a.strike)
+    const atm = g.spot || g.vol_trigger || 5000
+    return [...g.strike_data]
+      .filter(s => Math.abs(s.strike / atm - 1) <= 0.04)
+      .sort((a, b) => b.strike - a.strike)
   }, [g.strike_data])
 
   const maxGex = useMemo(() => {
@@ -24,8 +27,8 @@ export default function GexTab({ gex: g }: GexProps) {
     return Math.max(...strikes.map(s => Math.max(Math.abs(s.call_gex), Math.abs(s.put_gex)))) || 0.1
   }, [strikes])
 
-  const BAR_HEIGHT = 18
-  const BAR_GAP = 3
+  const BAR_HEIGHT = 14
+  const BAR_GAP = 2
   const CHART_W = 520
   const HALF = CHART_W / 2
   const Y_LABEL_W = 68
