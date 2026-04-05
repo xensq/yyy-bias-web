@@ -10,6 +10,7 @@ import MacroTab from "@/components/tabs/MacroTab"
 import ProbabilityTab from "@/components/tabs/ProbabilityTab"
 import DealerDeltaTab from "@/components/tabs/DealerDeltaTab"
 import FlowTab from "@/components/tabs/FlowTab"
+import BiasHistoryTab from "@/components/tabs/BiasHistoryTab"
 import { useRouter } from "next/navigation"
 
 const TABS = [
@@ -22,6 +23,7 @@ const TABS = [
   { id: "delta",      label: "Delta",       icon: "Δ" },
   { id: "flow",       label: "Flow",        icon: "θ" },
   { id: "macro",      label: "Macro",       icon: "Σ" },
+  { id: "history",    label: "History",     icon: "⊞" },
 ] as const
 type TabId = typeof TABS[number]["id"]
 
