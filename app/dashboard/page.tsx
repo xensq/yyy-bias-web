@@ -197,6 +197,7 @@ export default function Dashboard() {
           {tab === "probability" && <ProbabilityTab />}
           {tab === "delta" && <DealerDeltaTab />}
           {tab === "flow" && <FlowTab />}
+          {tab === "history" && <BiasHistoryTab />}
           {tab === "net iv" && <NetIVTab />}
 
           {data && !loading && (
