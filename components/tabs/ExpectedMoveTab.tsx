@@ -78,8 +78,8 @@ export default function ExpectedMoveTab() {
         <>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1px" }}>
             {[
-              { label: "spot", value: data.spot.toLocaleString() },
-              { label: "atm iv", value: `${data.atm_iv}%` },
+              { label: "spot", value: data.spot?.toLocaleString() ?? "—" },
+              { label: "atm iv", value: data.atm_iv != null ? `${data.atm_iv}%` : "—" },
               { label: "ticker", value: data.ticker },
             ].map(({ label, value }) => (
               <div key={label} style={{ padding: "16px 24px", border: "1px solid var(--border)", background: "rgba(0,0,0,0)" }}>
