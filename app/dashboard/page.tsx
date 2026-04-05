@@ -11,6 +11,7 @@ import ProbabilityTab from "@/components/tabs/ProbabilityTab"
 import DealerDeltaTab from "@/components/tabs/DealerDeltaTab"
 import FlowTab from "@/components/tabs/FlowTab"
 import BiasHistoryTab from "@/components/tabs/BiasHistoryTab"
+import ExpectedMoveTab from "@/components/tabs/ExpectedMoveTab"
 import { useRouter } from "next/navigation"
 
 const TABS = [
@@ -24,6 +25,7 @@ const TABS = [
   { id: "flow",       label: "Flow",        icon: "θ" },
   { id: "macro",      label: "Macro",       icon: "Σ" },
   { id: "history",    label: "History",     icon: "⊞" },
+  { id: "expected",   label: "Exp Move",    icon: "↔" },
 ] as const
 type TabId = typeof TABS[number]["id"]
 
@@ -198,6 +200,7 @@ export default function Dashboard() {
           {tab === "delta" && <DealerDeltaTab />}
           {tab === "flow" && <FlowTab />}
           {tab === "history" && <BiasHistoryTab />}
+          {tab === "expected" && <ExpectedMoveTab />}
           {tab === "net iv" && <NetIVTab />}
 
           {data && !loading && (
