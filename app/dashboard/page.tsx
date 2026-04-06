@@ -13,6 +13,7 @@ import FlowTab from "@/components/tabs/FlowTab"
 import BiasHistoryTab from "@/components/tabs/BiasHistoryTab"
 import ExpectedMoveTab from "@/components/tabs/ExpectedMoveTab"
 import { useRouter } from "next/navigation"
+import TerminalLoader from "@/components/TerminalLoader"
 import { checkAuth, clearKey } from "@/lib/auth"
 
 const TABS = [
