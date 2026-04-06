@@ -13,6 +13,7 @@ import FlowTab from "@/components/tabs/FlowTab"
 import BiasHistoryTab from "@/components/tabs/BiasHistoryTab"
 import ExpectedMoveTab from "@/components/tabs/ExpectedMoveTab"
 import { useRouter } from "next/navigation"
+import { checkAuth, clearKey } from "@/lib/auth"
 
 const TABS = [
   { id: "bias",        label: "Bias",        icon: "◈" },
@@ -93,6 +94,12 @@ export default function Dashboard() {
   })
   const [collapsed, setCollapsed] = useState(false)
   const router = useRouter()
+
+  useEffect(() => {
+    checkAuth().then(valid => {
+      if (!valid) { clearKey(); router.push("/") }
+    })
+  }, [])
 
   useEffect(() => {
     fetchBias()
