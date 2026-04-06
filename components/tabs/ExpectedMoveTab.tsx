@@ -6,73 +6,62 @@ const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 const TICKERS = ["SPX", "NDX", "SPY", "QQQ"]
 
 interface Move { iv: number; move_pts: number; move_pct: number; upper: number; lower: number }
-interface Radar { iv_level: number; vix_level: number; move_size: number; confidence: number; expansion_dw: number; expansion_wm: number }
 interface EMData {
   ticker: string; spot: number; atm_iv: number; iv_percentile?: number
   vix?: number; vix_move_pts?: number; vix_upper?: number; vix_lower?: number
   moves: { "1d": Move | null; "1w": Move | null; "1m": Move | null }
-  radar?: Radar
   error?: string
 }
 
-const RADAR_AXES = [
-  { key: "iv_level", label: "IV Level" },
-  { key: "vix_level", label: "VIX Level" },
-  { key: "move_size", label: "Move Size" },
-  { key: "confidence", label: "Confidence" },
-  { key: "expansion_dw", label: "1D→1W" },
-  { key: "expansion_wm", label: "1W→1M" },
-]
+function WaveForm({ d1, d1w, d1m }: { d1: Move; d1w: Move | null; d1m: Move | null }) {
+  const W = 860, H = 200
+  const cy = H / 2
+  const maxPct = Math.max(d1.move_pct, d1w?.move_pct ?? 0, d1m?.move_pct ?? 0)
+  const waves = [
+    d1m ? { move: d1m, color: "#5555dd", label: "1M", freq: 1.5, phase: 0 } : null,
+    d1w ? { move: d1w, color: "#e8b84b", label: "1W", freq: 3, phase: 0.5 } : null,
+    { move: d1, color: "#dc2626", label: "1D", freq: 6, phase: 1 },
+  ].filter(Boolean) as { move: Move; color: string; label: string; freq: number; phase: number }[]
 
-function SpiderChart({ radar }: { radar: Radar }) {
-  const N = 6
-  const cx = 160, cy = 160, r = 120
-  const axes = RADAR_AXES
-  const vals = axes.map(a => (radar as any)[a.key] as number)
+  const makePath = (amp: number, freq: number, phase: number) =>
+    Array.from({ length: W + 1 }, (_, x) => {
+      const y = cy - amp * Math.sin((x / W) * Math.PI * 2 * freq + phase)
+      return `${x === 0 ? "M" : "L"}${x},${y}`
+    }).join(" ")
 
-  const angleOf = (i: number) => (Math.PI * 2 * i) / N - Math.PI / 2
-
-  const point = (i: number, v: number) => {
-    const a = angleOf(i)
-    return { x: cx + r * v * Math.cos(a), y: cy + r * v * Math.sin(a) }
-  }
-
-  const gridLevels = [0.25, 0.5, 0.75, 1.0]
-
-  const dataPath = vals.map((v, i) => {
-    const p = point(i, v)
-    return `${i === 0 ? "M" : "L"}${p.x},${p.y}`
-  }).join(" ") + "Z"
+  const makeArea = (amp: number, freq: number, phase: number) =>
+    Array.from({ length: W + 1 }, (_, x) => {
+      const y = cy - amp * Math.sin((x / W) * Math.PI * 2 * freq + phase)
+      return `${x === 0 ? "M" : "L"}${x},${y}`
+    }).join(" ") + ` L${W},${cy} L0,${cy} Z`
 
   return (
-    <svg viewBox="0 0 320 320" style={{ width: "100%", maxWidth: "320px" }} xmlns="http://www.w3.org/2000/svg">
-      {gridLevels.map(level => (
-        <polygon key={level}
-          points={Array.from({ length: N }, (_, i) => { const p = point(i, level); return `${p.x},${p.y}` }).join(" ")}
-          fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1"
-        />
-      ))}
-      {Array.from({ length: N }, (_, i) => {
-        const p = point(i, 1)
-        return <line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
-      })}
-      <path d={dataPath} fill="rgba(220,38,38,0.15)" stroke="rgba(220,38,38,0.8)" strokeWidth="1.5" strokeLinejoin="round" />
-      {vals.map((v, i) => {
-        const p = point(i, v)
-        return <circle key={i} cx={p.x} cy={p.y} r="3" fill="#dc2626" />
-      })}
-      {axes.map((a, i) => {
-        const p = point(i, 1.22)
-        const anchor = p.x < cx - 5 ? "end" : p.x > cx + 5 ? "start" : "middle"
-        return (
-          <g key={i}>
-            <text x={p.x} y={p.y} textAnchor={anchor} fill="rgba(255,255,255,0.5)" fontSize="9" fontFamily="JetBrains Mono">{a.label}</text>
-            <text x={point(i, 1.38).x} y={point(i, 1.38).y} textAnchor={anchor} fill="rgba(220,38,38,0.7)" fontSize="8" fontFamily="JetBrains Mono">{Math.round(vals[i] * 100)}%</text>
-          </g>
-        )
-      })}
-      <circle cx={cx} cy={cy} r="3" fill="rgba(255,255,255,0.3)" />
-    </svg>
+    <div style={{ border: "1px solid var(--border)", padding: "24px 28px", background: "rgba(0,0,0,0)", marginBottom: "1px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+        <p style={{ fontSize: "9px", color: "var(--muted)", letterSpacing: "0.15em", textTransform: "uppercase" }}>volatility waveform — amplitude = expected move size</p>
+        <div style={{ display: "flex", gap: "20px" }}>
+          {[{ l: "1D", c: "#dc2626" }, { l: "1W", c: "#e8b84b" }, { l: "1M", c: "#5555dd" }].map(({ l, c }) => (
+            <div key={l} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <div style={{ width: "12px", height: "2px", background: c }} />
+              <span style={{ fontSize: "8px", color: "var(--muted)", letterSpacing: "0.1em" }}>{l}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: "auto" }} xmlns="http://www.w3.org/2000/svg">
+        <line x1={0} y1={cy} x2={W} y2={cy} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+        {waves.map(({ move, color, label, freq, phase }) => {
+          const amp = (move.move_pct / maxPct) * (H / 2 - 24)
+          return (
+            <g key={label}>
+              <path d={makeArea(amp, freq, phase)} fill={color} fillOpacity="0.05" />
+              <path d={makePath(amp, freq, phase)} fill="none" stroke={color} strokeWidth="1.5" strokeOpacity="0.8" />
+              <text x={W - 6} y={cy - amp - 8} textAnchor="end" fill={color} fontSize="9" fontFamily="JetBrains Mono" opacity="0.9">{label} +/-{move.move_pct}%</text>
+            </g>
+          )
+        })}
+      </svg>
+    </div>
   )
 }
 
@@ -164,40 +153,7 @@ export default function ExpectedMoveTab() {
             </div>
           )}
 
-          {data.radar && d1 && (
-            <div style={{ border: "1px solid var(--border)", background: "rgba(0,0,0,0)", marginBottom: "1px", display: "grid", gridTemplateColumns: "320px 1fr" }}>
-              <div style={{ padding: "24px", borderRight: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <SpiderChart radar={data.radar} />
-              </div>
-              <div style={{ padding: "24px" }}>
-                <p style={{ fontSize: "9px", color: "var(--muted)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "20px" }}>volatility profile</p>
-                <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-                  {RADAR_AXES.map(({ key, label }) => {
-                    const val = (data.radar as any)[key] as number
-                    const pct = Math.round(val * 100)
-                    const color = val > 0.75 ? "var(--bear)" : val > 0.5 ? "var(--warn)" : val > 0.25 ? "var(--accent)" : "var(--bull)"
-                    return (
-                      <div key={key}>
-                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}>
-                          <span style={{ fontSize: "9px", color: "var(--muted)", letterSpacing: "0.1em" }}>{label}</span>
-                          <span style={{ fontSize: "9px", color, fontFamily: "JetBrains Mono", fontWeight: 600 }}>{pct}%</span>
-                        </div>
-                        <div style={{ height: "2px", background: "var(--border)" }}>
-                          <div style={{ height: "100%", width: `${pct}%`, background: color, transition: "width 0.6s ease" }} />
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-                {data.iv_percentile != null && (
-                  <div style={{ marginTop: "20px", padding: "10px 14px", border: "1px solid var(--border)", background: "rgba(0,0,0,0.2)" }}>
-                    <p style={{ fontSize: "8px", color: "var(--muted)", marginBottom: "4px", letterSpacing: "0.1em" }}>IV PERCENTILE (1Y)</p>
-                    <p style={{ fontSize: "16px", color: "var(--accent)", fontFamily: "JetBrains Mono", fontWeight: 700 }}>{data.iv_percentile}%</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+          {d1 && <WaveForm d1={d1} d1w={data.moves["1w"]} d1m={data.moves["1m"]} />}
 
           {d1 && (
             <div style={{ border: "1px solid var(--border)", background: "rgba(0,0,0,0)", marginBottom: "1px" }}>
