@@ -34,24 +34,9 @@ export default function ExpectedMoveTab() {
   const copyCard = () => {
     if (!data || !data.moves["1d"]) return
     const d = data.moves["1d"]!
-    const vixLine = data.vix_move_pts
-      ? `VIX method:  ±${data.vix_move_pts}pts  upper ${data.vix_upper?.toLocaleString()}  lower ${data.vix_lower?.toLocaleString()}`
-      : ""
-    const agree = data.vix_move_pts
-      ? Math.abs(d.move_pts - data.vix_move_pts) / d.move_pts < 0.05
-        ? "✓ methods agree — high confidence"
-        : "⚠ methods diverge — use caution"
-      : ""
-    const text = [
-      `YYY DAILY RANGE — ${data.ticker}`,
-      "━━━━━━━━━━━━━━━━━━━━━━━━━",
-      `upper:  ${d.upper.toLocaleString()}  |  lower:  ${d.lower.toLocaleString()}`,
-      `move:   ±${d.move_pts}pts    ±${d.move_pct}%`,
-      vixLine, agree,
-      `IV:     ${data.atm_iv}%${data.vix ? `   VIX: ${data.vix}` : ""}`,
-      "━━━━━━━━━━━━━━━━━━━━━━━━━",
-      "yyy-bias-web.vercel.app",
-    ].filter(Boolean).join("\n")
+    const vixLine = data.vix_move_pts ? `VIX method:  ±${data.vix_move_pts}pts  upper ${data.vix_upper?.toLocaleString()}  lower ${data.vix_lower?.toLocaleString()}` : ""
+    const agree = data.vix_move_pts ? (Math.abs(d.move_pts - data.vix_move_pts) / d.move_pts < 0.05 ? "✓ methods agree — high confidence" : "⚠ methods diverge — use caution") : ""
+    const text = [`YYY DAILY RANGE — ${data.ticker}`, "━━━━━━━━━━━━━━━━━━━━━━━━━", `upper:  ${d.upper.toLocaleString()}  |  lower:  ${d.lower.toLocaleString()}`, `move:   ±${d.move_pts}pts    ±${d.move_pct}%`, vixLine, agree, `IV:     ${data.atm_iv}%${data.vix ? `   VIX: ${data.vix}` : ""}`, "━━━━━━━━━━━━━━━━━━━━━━━━━", "yyy-bias-web.vercel.app"].filter(Boolean).join("\n")
     navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
@@ -75,10 +60,57 @@ export default function ExpectedMoveTab() {
     )
   }
 
+  const Cone = ({ d1, d1w, d1m, spot }: { d1: Move; d1w: Move | null; d1m: Move | null; spot: number }) => {
+    const bands = [
+      { move: d1m, color: "#4444cc", labelColor: "#8888ff", label: "1M" },
+      { move: d1w, color: "#cc9900", labelColor: "#e8b84b", label: "1W" },
+      { move: d1,  color: "var(--accent)", labelColor: "var(--accent)", label: "1D" },
+    ].filter(b => b.move) as { move: Move; color: string; labelColor: string; label: string }[]
+    return (
+      <div style={{ border: "1px solid var(--border)", padding: "28px 32px 32px", background: "rgba(0,0,0,0)", marginBottom: "1px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "28px" }}>
+          <p style={{ fontSize: "9px", color: "var(--muted)", letterSpacing: "0.15em", textTransform: "uppercase" }}>volatility expansion cone</p>
+          <div style={{ display: "flex", gap: "20px" }}>
+            {[{ l: "1D", c: "var(--accent)" }, { l: "1W", c: "#e8b84b" }, { l: "1M", c: "#8888ff" }].map(({ l, c }) => (
+              <div key={l} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <div style={{ width: "12px", height: "2px", background: c }} />
+                <span style={{ fontSize: "8px", color: "var(--muted)", letterSpacing: "0.1em" }}>{l}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{ position: "relative", height: "200px" }}>
+          <div style={{ position: "absolute", left: "12%", right: "8%", top: "50%", height: "1px", background: "rgba(255,255,255,0.06)" }} />
+          <div style={{ position: "absolute", left: "12%", top: "50%", transform: "translate(-50%,-50%)", display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+            <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--accent)", boxShadow: "0 0 12px rgba(220,38,38,0.7)" }} />
+            <span style={{ fontSize: "8px", color: "var(--accent)", fontFamily: "JetBrains Mono", whiteSpace: "nowrap" }}>{spot.toLocaleString()}</span>
+          </div>
+          {bands.map(({ move, labelColor, label }) => {
+            const h = Math.min(move.move_pct * 14, 46)
+            return (
+              <div key={label} style={{ position: "absolute", left: "12%", right: "8%", top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>
+                <div style={{ position: "absolute", left: 0, right: 0, bottom: "50%", height: `${h}%`, background: `linear-gradient(to right, transparent 0%, ${labelColor} 100%)`, opacity: 0.18, clipPath: "polygon(0 100%, 100% 0, 100% 100%)" }} />
+                <div style={{ position: "absolute", left: 0, right: 0, bottom: "50%", height: `${h}%`, borderTop: `1px solid ${labelColor}`, opacity: 0.5, clipPath: "polygon(0 100%, 100% 0, 100% 100%)" }} />
+                <div style={{ position: "absolute", left: 0, right: 0, top: "50%", height: `${h}%`, background: `linear-gradient(to right, transparent 0%, ${labelColor} 100%)`, opacity: 0.18, clipPath: "polygon(0 0, 100% 0, 100% 100%)" }} />
+                <div style={{ position: "absolute", left: 0, right: 0, top: "50%", height: `${h}%`, borderBottom: `1px solid ${labelColor}`, opacity: 0.5, clipPath: "polygon(0 0, 100% 0, 100% 100%)" }} />
+                <div style={{ position: "absolute", right: 0, top: `calc(50% - ${h}% - 20px)`, textAlign: "right" }}>
+                  <span style={{ fontSize: "10px", color: "var(--bull)", fontFamily: "JetBrains Mono", fontWeight: 600 }}>{move.upper.toLocaleString()}</span>
+                  <span style={{ fontSize: "7px", color: labelColor, marginLeft: "6px", letterSpacing: "0.1em" }}>{label}</span>
+                </div>
+                <div style={{ position: "absolute", right: 0, top: `calc(50% + ${h}% + 4px)`, textAlign: "right" }}>
+                  <span style={{ fontSize: "7px", color: labelColor, marginRight: "6px", letterSpacing: "0.1em" }}>{label}</span>
+                  <span style={{ fontSize: "10px", color: "var(--bear)", fontFamily: "JetBrains Mono", fontWeight: 600 }}>{move.lower.toLocaleString()}</span>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    )
+  }
+
   const d1 = data?.moves["1d"]
-  const vixAgree = d1 && data?.vix_move_pts
-    ? Math.abs(d1.move_pts - data.vix_move_pts) / d1.move_pts < 0.05
-    : null
+  const vixAgree = d1 && data?.vix_move_pts ? Math.abs(d1.move_pts - data.vix_move_pts) / d1.move_pts < 0.05 : null
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
@@ -89,12 +121,7 @@ export default function ExpectedMoveTab() {
         </div>
         <div style={{ display: "flex", gap: "4px" }}>
           {TICKERS.map(t => (
-            <button key={t} onClick={() => setTicker(t)} style={{
-              padding: "6px 14px", background: ticker === t ? "var(--accent-dim)" : "transparent",
-              border: `1px solid ${ticker === t ? "var(--accent)" : "var(--border)"}`,
-              color: ticker === t ? "var(--accent)" : "var(--muted)",
-              fontSize: "9px", letterSpacing: "0.1em", cursor: "pointer", fontFamily: "inherit"
-            }}>{t}</button>
+            <button key={t} onClick={() => setTicker(t)} style={{ padding: "6px 14px", background: ticker === t ? "var(--accent-dim)" : "transparent", border: `1px solid ${ticker === t ? "var(--accent)" : "var(--border)"}`, color: ticker === t ? "var(--accent)" : "var(--muted)", fontSize: "9px", letterSpacing: "0.1em", cursor: "pointer", fontFamily: "inherit" }}>{t}</button>
           ))}
         </div>
       </div>
@@ -108,102 +135,28 @@ export default function ExpectedMoveTab() {
             <div style={{ border: "1px solid var(--border)", padding: "32px", background: "rgba(0,0,0,0)", marginBottom: "1px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                 <div>
-                  <p style={{ fontSize: "8px", color: "var(--muted)", letterSpacing: "0.3em", textTransform: "uppercase", marginBottom: "12px" }}>{"today's range — "}{data.ticker}</p>
+                  <p style={{ fontSize: "8px", color: "var(--muted)", letterSpacing: "0.3em", textTransform: "uppercase", marginBottom: "12px" }}>{"today's range"} — {data.ticker}</p>
                   <div style={{ display: "flex", alignItems: "baseline", gap: "20px" }}>
                     <span style={{ fontSize: "clamp(28px,4vw,48px)", fontFamily: "JetBrains Mono", fontWeight: 700, color: "var(--bull)" }}>{d1.upper.toLocaleString()}</span>
                     <span style={{ fontSize: "20px", color: "var(--muted)", fontFamily: "JetBrains Mono" }}>—</span>
                     <span style={{ fontSize: "clamp(28px,4vw,48px)", fontFamily: "JetBrains Mono", fontWeight: 700, color: "var(--bear)" }}>{d1.lower.toLocaleString()}</span>
                   </div>
-                  <p style={{ fontSize: "11px", color: "var(--muted)", marginTop: "10px", fontFamily: "JetBrains Mono" }}>
-                    {"±"}{d1.move_pts}{" pts · ±"}{d1.move_pct}{"% · 68% probability"}
-                  </p>
+                  <p style={{ fontSize: "11px", color: "var(--muted)", marginTop: "10px", fontFamily: "JetBrains Mono" }}>{"±"}{d1.move_pts}{" pts · ±"}{d1.move_pct}{"% · 68% probability"}</p>
                 </div>
-                <button onClick={copyCard} style={{
-                  padding: "10px 20px", background: copied ? "var(--accent-dim)" : "transparent",
-                  border: "1px solid var(--accent)", color: "var(--accent)",
-                  fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase",
-                  cursor: "pointer", fontFamily: "inherit", transition: "all 0.2s", whiteSpace: "nowrap"
-                }}>
+                <button onClick={copyCard} style={{ padding: "10px 20px", background: copied ? "var(--accent-dim)" : "transparent", border: "1px solid var(--accent)", color: "var(--accent)", fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase", cursor: "pointer", fontFamily: "inherit", transition: "all 0.2s", whiteSpace: "nowrap" }}>
                   {copied ? "copied ✓" : "copy range card"}
                 </button>
               </div>
             </div>
           )}
 
+          {d1 && <Cone d1={d1} d1w={data.moves["1w"]} d1m={data.moves["1m"]} spot={data.spot} />}
+
           {d1 && (
-  
-          {/* 3D Expansion Cone */}
-          {d1 && data.moves['1w'] && data.moves['1m'] && (
-            <div style={{ border: '1px solid var(--border)', padding: '28px 32px', background: 'rgba(0,0,0,0)', marginBottom: '1px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                <p style={{ fontSize: '9px', color: 'var(--muted)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>volatility expansion cone</p>
-                <div style={{ display: 'flex', gap: '20px' }}>
-                  {[{ label: '1D', color: 'var(--accent)' }, { label: '1W', color: 'var(--warn)' }, { label: '1M', color: '#8888ff' }].map(({ label, color }) => (
-                    <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <div style={{ width: '12px', height: '2px', background: color }} />
-                      <span style={{ fontSize: '8px', color: 'var(--muted)', letterSpacing: '0.1em' }}>{label}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div style={{ position: 'relative', height: '160px', perspective: '800px' }}>
-                {/* Center line */}
-                <div style={{ position: 'absolute', left: '10%', right: 0, top: '50%', height: '1px', background: 'rgba(255,255,255,0.08)', transform: 'translateY(-50%)' }} />
-                {/* Spot label */}
-                <div style={{ position: 'absolute', left: '10%', top: '50%', transform: 'translate(-50%, -50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent)', boxShadow: '0 0 12px rgba(var(--accent-rgb),0.6)' }} />
-                  <span style={{ fontSize: '8px', color: 'var(--accent)', fontFamily: 'JetBrains Mono', whiteSpace: 'nowrap' }}>{data.spot.toLocaleString()}</span>
-                </div>
-                {[
-                  { move: data.moves['1m']!, color: '#4444aa', opacity: 0.12, label: '1M', labelColor: '#8888ff' },
-                  { move: data.moves['1w']!, color: '#aa8800', opacity: 0.15, label: '1W', labelColor: 'var(--warn)' },
-                  { move: d1, color: 'rgba(var(--accent-rgb),1)', opacity: 0.2, label: '1D', labelColor: 'var(--accent)' },
-                ].map(({ move, color, opacity, label, labelColor }) => {
-                  const pct = move.move_pct
-                  const heightPct = Math.min(pct * 12, 45)
-                  return (
-                    <div key={label} style={{ position: 'absolute', left: '10%', right: 0, top: '50%', transform: 'translateY(-50%)' }}>
-                      {/* Upper band */}
-                      <div style={{
-                        position: 'absolute', left: 0, right: 0,
-                        height: `${heightPct}%`, bottom: '100%',
-                        background: `linear-gradient(to right, transparent, ${color})`,
-                        opacity, borderTop: `1px solid ${labelColor}`, borderRight: `1px solid ${labelColor}`,
-                        transformOrigin: 'left center',
-                        clipPath: 'polygon(0 100%, 100% 0, 100% 100%)',
-                      }} />
-                      {/* Lower band */}
-                      <div style={{
-                        position: 'absolute', left: 0, right: 0,
-                        height: `${heightPct}%`, top: '100%',
-                        background: `linear-gradient(to right, transparent, ${color})`,
-                        opacity, borderBottom: `1px solid ${labelColor}`, borderRight: `1px solid ${labelColor}`,
-                        clipPath: 'polygon(0 0, 100% 0, 100% 100%)',
-                      }} />
-                      {/* Upper label + price */}
-                      <div style={{ position: 'absolute', right: '2px', bottom: `calc(100% + ${heightPct}% - 4px)`, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                        <span style={{ fontSize: '10px', color: 'var(--bull)', fontFamily: 'JetBrains Mono', fontWeight: 600 }}>{move.upper.toLocaleString()}</span>
-                        <span style={{ fontSize: '7px', color: labelColor, letterSpacing: '0.1em' }}>{label} upper</span>
-                      </div>
-                      {/* Lower label + price */}
-                      <div style={{ position: 'absolute', right: '2px', top: `calc(100% + ${heightPct}% - 4px)`, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                        <span style={{ fontSize: '7px', color: labelColor, letterSpacing: '0.1em' }}>{label} lower</span>
-                        <span style={{ fontSize: '10px', color: 'var(--bear)', fontFamily: 'JetBrains Mono', fontWeight: 600 }}>{move.lower.toLocaleString()}</span>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-          <div style={{ border: "1px solid var(--border)", background: "rgba(0,0,0,0)", marginBottom: "1px" }}>
+            <div style={{ border: "1px solid var(--border)", background: "rgba(0,0,0,0)", marginBottom: "1px" }}>
               <div style={{ padding: "12px 24px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <p style={{ fontSize: "9px", color: "var(--muted)", letterSpacing: "0.15em", textTransform: "uppercase" }}>dual-method comparison</p>
-                {vixAgree !== null && (
-                  <span style={{ fontSize: "8px", color: vixAgree ? "var(--bull)" : "var(--warn)", letterSpacing: "0.1em" }}>
-                    {vixAgree ? "✓ methods agree — high confidence" : "⚠ methods diverge — use caution"}
-                  </span>
-                )}
+                {vixAgree !== null && <span style={{ fontSize: "8px", color: vixAgree ? "var(--bull)" : "var(--warn)", letterSpacing: "0.1em" }}>{vixAgree ? "✓ methods agree — high confidence" : "⚠ methods diverge — use caution"}</span>}
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px" }}>
                 <div style={{ padding: "20px 24px", borderRight: "1px solid var(--border)" }}>
@@ -233,12 +186,7 @@ export default function ExpectedMoveTab() {
           )}
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1px", marginBottom: "1px" }}>
-            {[
-              { label: "spot", value: data.spot?.toLocaleString() ?? "—" },
-              { label: "atm iv", value: data.atm_iv != null ? `${data.atm_iv}%` : "—" },
-              { label: "vix", value: data.vix != null ? `${data.vix}` : "—" },
-              { label: "ticker", value: data.ticker },
-            ].map(({ label, value }) => (
+            {[{ label: "spot", value: data.spot?.toLocaleString() ?? "—" }, { label: "atm iv", value: data.atm_iv != null ? `${data.atm_iv}%` : "—" }, { label: "vix", value: data.vix != null ? `${data.vix}` : "—" }, { label: "ticker", value: data.ticker }].map(({ label, value }) => (
               <div key={label} style={{ padding: "14px 20px", border: "1px solid var(--border)", background: "rgba(0,0,0,0)" }}>
                 <p style={{ fontSize: "8px", color: "var(--muted)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "6px" }}>{label}</p>
                 <p style={{ fontSize: "16px", fontFamily: "JetBrains Mono", color: "var(--text)", fontWeight: 600 }}>{value}</p>
@@ -248,9 +196,7 @@ export default function ExpectedMoveTab() {
 
           <div style={{ border: "1px solid var(--border)", background: "rgba(0,0,0,0)", marginBottom: "1px" }}>
             <div style={{ display: "grid", gridTemplateColumns: "80px 90px 90px 100px 1fr 110px 110px", padding: "8px 24px", borderBottom: "1px solid var(--border)", background: "rgba(30,30,46,0.5)", gap: "8px" }}>
-              {["period","iv","±%","±pts","range","upper","lower"].map(h => (
-                <span key={h} style={{ fontSize: "8px", color: "var(--muted)", letterSpacing: "0.15em", textTransform: "uppercase" }}>{h}</span>
-              ))}
+              {["period","iv","±%","±pts","range","upper","lower"].map(h => (<span key={h} style={{ fontSize: "8px", color: "var(--muted)", letterSpacing: "0.15em", textTransform: "uppercase" }}>{h}</span>))}
             </div>
             <Row label="1 DAY" move={data.moves["1d"]} />
             <Row label="1 WEEK" move={data.moves["1w"]} />
@@ -260,23 +206,13 @@ export default function ExpectedMoveTab() {
           <div style={{ border: "1px solid var(--border)", display: "grid", gridTemplateColumns: "1fr 1fr", background: "rgba(0,0,0,0)" }}>
             <div style={{ padding: "16px 24px", borderRight: "1px solid var(--border)" }}>
               <p style={{ fontSize: "9px", color: "var(--muted)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "10px" }}>how to use this</p>
-              {[
-                "1-day bracket = your range for the session. don't set targets outside it without strong confluence.",
-                "when ATM IV and VIX agree = high confidence. trade the bracket with conviction.",
-                "when they diverge = something is mispriced. size down, wait for clarity.",
-                "high ATM IV = bracket is wide, options expensive. take profits earlier than usual.",
-              ].map((t, i) => (
+              {["1-day bracket = your range for the session. don't set targets outside it without strong confluence.", "when ATM IV and VIX agree = high confidence. trade the bracket with conviction.", "when they diverge = something is mispriced. size down, wait for clarity.", "high ATM IV = bracket is wide, options expensive. take profits earlier than usual."].map((t, i) => (
                 <p key={i} style={{ fontSize: "8px", color: "var(--muted)", lineHeight: 1.7, marginBottom: "6px" }}>· {t}</p>
               ))}
             </div>
             <div style={{ padding: "16px 24px" }}>
               <p style={{ fontSize: "9px", color: "var(--muted)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "10px" }}>iv regime</p>
-              {[
-                { range: "below 20%", label: "compressed", desc: "pinning likely. fade breakouts.", color: "var(--bull)" },
-                { range: "20–35%", label: "normal", desc: "standard moves. use brackets as-is.", color: "var(--muted)" },
-                { range: "35–50%", label: "elevated", desc: "real moves. take profits early.", color: "var(--warn)" },
-                { range: "above 50%", label: "crisis", desc: "don't hold overnight. size way down.", color: "var(--bear)" },
-              ].map(({ range, label, desc, color }) => (
+              {[{ range: "below 20%", label: "compressed", desc: "pinning likely. fade breakouts.", color: "var(--bull)" }, { range: "20–35%", label: "normal", desc: "standard moves. use brackets as-is.", color: "var(--muted)" }, { range: "35–50%", label: "elevated", desc: "real moves. take profits early.", color: "var(--warn)" }, { range: "above 50%", label: "crisis", desc: "don't hold overnight. size way down.", color: "var(--bear)" }].map(({ range, label, desc, color }) => (
                 <div key={range} style={{ display: "flex", gap: "12px", marginBottom: "8px" }}>
                   <span style={{ fontSize: "8px", color, fontFamily: "JetBrains Mono", width: "70px", flexShrink: 0, fontWeight: 600 }}>{range}</span>
                   <span style={{ fontSize: "8px", color: "var(--muted)" }}><span style={{ color }}>{label}</span> · {desc}</span>
