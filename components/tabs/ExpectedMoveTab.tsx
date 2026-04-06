@@ -6,11 +6,74 @@ const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 const TICKERS = ["SPX", "NDX", "SPY", "QQQ"]
 
 interface Move { iv: number; move_pts: number; move_pct: number; upper: number; lower: number }
+interface Radar { iv_level: number; vix_level: number; move_size: number; confidence: number; expansion_dw: number; expansion_wm: number }
 interface EMData {
-  ticker: string; spot: number; atm_iv: number
+  ticker: string; spot: number; atm_iv: number; iv_percentile?: number
   vix?: number; vix_move_pts?: number; vix_upper?: number; vix_lower?: number
   moves: { "1d": Move | null; "1w": Move | null; "1m": Move | null }
+  radar?: Radar
   error?: string
+}
+
+const RADAR_AXES = [
+  { key: "iv_level", label: "IV Level" },
+  { key: "vix_level", label: "VIX Level" },
+  { key: "move_size", label: "Move Size" },
+  { key: "confidence", label: "Confidence" },
+  { key: "expansion_dw", label: "1D→1W" },
+  { key: "expansion_wm", label: "1W→1M" },
+]
+
+function SpiderChart({ radar }: { radar: Radar }) {
+  const N = 6
+  const cx = 160, cy = 160, r = 120
+  const axes = RADAR_AXES
+  const vals = axes.map(a => (radar as any)[a.key] as number)
+
+  const angleOf = (i: number) => (Math.PI * 2 * i) / N - Math.PI / 2
+
+  const point = (i: number, v: number) => {
+    const a = angleOf(i)
+    return { x: cx + r * v * Math.cos(a), y: cy + r * v * Math.sin(a) }
+  }
+
+  const gridLevels = [0.25, 0.5, 0.75, 1.0]
+
+  const dataPath = vals.map((v, i) => {
+    const p = point(i, v)
+    return `${i === 0 ? "M" : "L"}${p.x},${p.y}`
+  }).join(" ") + "Z"
+
+  return (
+    <svg viewBox="0 0 320 320" style={{ width: "100%", maxWidth: "320px" }} xmlns="http://www.w3.org/2000/svg">
+      {gridLevels.map(level => (
+        <polygon key={level}
+          points={Array.from({ length: N }, (_, i) => { const p = point(i, level); return `${p.x},${p.y}` }).join(" ")}
+          fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1"
+        />
+      ))}
+      {Array.from({ length: N }, (_, i) => {
+        const p = point(i, 1)
+        return <line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+      })}
+      <path d={dataPath} fill="rgba(220,38,38,0.15)" stroke="rgba(220,38,38,0.8)" strokeWidth="1.5" strokeLinejoin="round" />
+      {vals.map((v, i) => {
+        const p = point(i, v)
+        return <circle key={i} cx={p.x} cy={p.y} r="3" fill="#dc2626" />
+      })}
+      {axes.map((a, i) => {
+        const p = point(i, 1.22)
+        const anchor = p.x < cx - 5 ? "end" : p.x > cx + 5 ? "start" : "middle"
+        return (
+          <g key={i}>
+            <text x={p.x} y={p.y} textAnchor={anchor} fill="rgba(255,255,255,0.5)" fontSize="9" fontFamily="JetBrains Mono">{a.label}</text>
+            <text x={point(i, 1.38).x} y={point(i, 1.38).y} textAnchor={anchor} fill="rgba(220,38,38,0.7)" fontSize="8" fontFamily="JetBrains Mono">{Math.round(vals[i] * 100)}%</text>
+          </g>
+        )
+      })}
+      <circle cx={cx} cy={cy} r="3" fill="rgba(255,255,255,0.3)" />
+    </svg>
+  )
 }
 
 export default function ExpectedMoveTab() {
@@ -34,18 +97,9 @@ export default function ExpectedMoveTab() {
   const copyCard = () => {
     if (!data || !data.moves["1d"]) return
     const d = data.moves["1d"]!
-    const vixLine = data.vix_move_pts ? `VIX method:  +/-${data.vix_move_pts}pts  upper ${data.vix_upper?.toLocaleString()}  lower ${data.vix_lower?.toLocaleString()}` : ""
+    const vixLine = data.vix_move_pts ? `VIX:    +/-${data.vix_move_pts}pts  upper ${data.vix_upper?.toLocaleString()}  lower ${data.vix_lower?.toLocaleString()}` : ""
     const agree = data.vix_move_pts ? (Math.abs(d.move_pts - data.vix_move_pts) / d.move_pts < 0.05 ? "methods agree - high confidence" : "methods diverge - use caution") : ""
-    const text = [
-      `YYY DAILY RANGE -- ${data.ticker}`,
-      "-------------------------",
-      `upper:  ${d.upper.toLocaleString()}  |  lower:  ${d.lower.toLocaleString()}`,
-      `move:   +/-${d.move_pts}pts    +/-${d.move_pct}%`,
-      vixLine, agree,
-      `IV:     ${data.atm_iv}%${data.vix ? `   VIX: ${data.vix}` : ""}`,
-      "-------------------------",
-      "yyy-bias-web.vercel.app",
-    ].filter(Boolean).join("\n")
+    const text = [`YYY DAILY RANGE -- ${data.ticker}`, "-------------------------", `upper:  ${d.upper.toLocaleString()}  |  lower:  ${d.lower.toLocaleString()}`, `move:   +/-${d.move_pts}pts    +/-${d.move_pct}%`, vixLine, agree, `IV:     ${data.atm_iv}%${data.vix ? `   VIX: ${data.vix}` : ""}`, "-------------------------", "yyy-bias-web.vercel.app"].filter(Boolean).join("\n")
     navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
@@ -71,62 +125,6 @@ export default function ExpectedMoveTab() {
 
   const d1 = data?.moves["1d"]
   const vixAgree = d1 && data?.vix_move_pts ? Math.abs(d1.move_pts - data.vix_move_pts) / d1.move_pts < 0.05 : null
-
-  const renderCone = (d1: Move, d1w: Move | null, d1m: Move | null, spot: number) => {
-    const W = 860, H = 220, cx = 100, cy = H / 2
-    const maxPct = Math.max(d1.move_pct, d1w?.move_pct ?? 0, d1m?.move_pct ?? 0)
-    const scale = (W - cx - 60) / maxPct
-    const bands = [
-      d1m ? { move: d1m, color: "#5555dd", label: "1M" } : null,
-      d1w ? { move: d1w, color: "#e8b84b", label: "1W" } : null,
-      { move: d1, color: "#dc2626", label: "1D" },
-    ].filter(Boolean) as { move: Move; color: string; label: string }[]
-
-    return (
-      <div style={{ border: "1px solid var(--border)", padding: "24px 28px", background: "rgba(0,0,0,0)", marginBottom: "1px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-          <p style={{ fontSize: "9px", color: "var(--muted)", letterSpacing: "0.15em", textTransform: "uppercase" }}>volatility expansion cone</p>
-          <div style={{ display: "flex", gap: "20px" }}>
-            {[{ l: "1D", c: "#dc2626" }, { l: "1W", c: "#e8b84b" }, { l: "1M", c: "#5555dd" }].map(({ l, c }) => (
-              <div key={l} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <div style={{ width: "12px", height: "2px", background: c }} />
-                <span style={{ fontSize: "8px", color: "var(--muted)", letterSpacing: "0.1em" }}>{l}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-        <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: "auto" }} xmlns="http://www.w3.org/2000/svg">
-          <line x1={cx} y1={cy} x2={W - 20} y2={cy} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
-          <circle cx={cx} cy={cy} r="6" fill="#dc2626" />
-          <circle cx={cx} cy={cy} r="14" fill="rgba(220,38,38,0.12)" />
-          <text x={cx} y={cy + 26} textAnchor="middle" fill="rgba(220,38,38,0.8)" fontSize="9" fontFamily="JetBrains Mono">{spot.toLocaleString()}</text>
-          {bands.map(({ move, color, label }) => {
-            const halfH = move.move_pct * scale
-            const x2 = cx + (W - cx - 60)
-            const upperY = cy - halfH
-            const lowerY = cy + halfH
-            return (
-              <g key={label}>
-                <polygon
-                  points={`${cx},${cy} ${x2},${upperY} ${x2},${lowerY}`}
-                  fill={color}
-                  fillOpacity="0.07"
-                  stroke={color}
-                  strokeOpacity="0.5"
-                  strokeWidth="1.5"
-                />
-                <text x={x2 + 6} y={upperY + 4} fill="#22c55e" fontSize="11" fontFamily="JetBrains Mono" fontWeight="600">{move.upper.toLocaleString()}</text>
-                <text x={x2 + 6} y={upperY - 4} fill={color} fontSize="7" fontFamily="JetBrains Mono" opacity="0.8">{label}</text>
-                <text x={x2 + 6} y={lowerY + 14} fill="#ff4466" fontSize="11" fontFamily="JetBrains Mono" fontWeight="600">{move.lower.toLocaleString()}</text>
-                <text x={x2 + 6} y={lowerY + 2} fill={color} fontSize="7" fontFamily="JetBrains Mono" opacity="0.8">{label}</text>
-                <line x1={x2} y1={upperY} x2={x2} y2={lowerY} stroke={color} strokeWidth="1.5" strokeOpacity="0.4" />
-              </g>
-            )
-          })}
-        </svg>
-      </div>
-    )
-  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
@@ -166,7 +164,40 @@ export default function ExpectedMoveTab() {
             </div>
           )}
 
-          {d1 && renderCone(d1, data.moves["1w"], data.moves["1m"], data.spot)}
+          {data.radar && d1 && (
+            <div style={{ border: "1px solid var(--border)", background: "rgba(0,0,0,0)", marginBottom: "1px", display: "grid", gridTemplateColumns: "320px 1fr" }}>
+              <div style={{ padding: "24px", borderRight: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <SpiderChart radar={data.radar} />
+              </div>
+              <div style={{ padding: "24px" }}>
+                <p style={{ fontSize: "9px", color: "var(--muted)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "20px" }}>volatility profile</p>
+                <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                  {RADAR_AXES.map(({ key, label }) => {
+                    const val = (data.radar as any)[key] as number
+                    const pct = Math.round(val * 100)
+                    const color = val > 0.75 ? "var(--bear)" : val > 0.5 ? "var(--warn)" : val > 0.25 ? "var(--accent)" : "var(--bull)"
+                    return (
+                      <div key={key}>
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}>
+                          <span style={{ fontSize: "9px", color: "var(--muted)", letterSpacing: "0.1em" }}>{label}</span>
+                          <span style={{ fontSize: "9px", color, fontFamily: "JetBrains Mono", fontWeight: 600 }}>{pct}%</span>
+                        </div>
+                        <div style={{ height: "2px", background: "var(--border)" }}>
+                          <div style={{ height: "100%", width: `${pct}%`, background: color, transition: "width 0.6s ease" }} />
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+                {data.iv_percentile != null && (
+                  <div style={{ marginTop: "20px", padding: "10px 14px", border: "1px solid var(--border)", background: "rgba(0,0,0,0.2)" }}>
+                    <p style={{ fontSize: "8px", color: "var(--muted)", marginBottom: "4px", letterSpacing: "0.1em" }}>IV PERCENTILE (1Y)</p>
+                    <p style={{ fontSize: "16px", color: "var(--accent)", fontFamily: "JetBrains Mono", fontWeight: 700 }}>{data.iv_percentile}%</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {d1 && (
             <div style={{ border: "1px solid var(--border)", background: "rgba(0,0,0,0)", marginBottom: "1px" }}>
@@ -212,7 +243,7 @@ export default function ExpectedMoveTab() {
 
           <div style={{ border: "1px solid var(--border)", background: "rgba(0,0,0,0)", marginBottom: "1px" }}>
             <div style={{ display: "grid", gridTemplateColumns: "80px 90px 90px 100px 1fr 110px 110px", padding: "8px 24px", borderBottom: "1px solid var(--border)", background: "rgba(30,30,46,0.5)", gap: "8px" }}>
-              {["period","iv","+/-% ","+/-pts","range","upper","lower"].map(h => (<span key={h} style={{ fontSize: "8px", color: "var(--muted)", letterSpacing: "0.15em", textTransform: "uppercase" }}>{h}</span>))}
+              {["period","iv","+/-%","+/-pts","range","upper","lower"].map(h => (<span key={h} style={{ fontSize: "8px", color: "var(--muted)", letterSpacing: "0.15em", textTransform: "uppercase" }}>{h}</span>))}
             </div>
             <Row label="1 DAY" move={data.moves["1d"]} />
             <Row label="1 WEEK" move={data.moves["1w"]} />
