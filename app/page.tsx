@@ -131,6 +131,12 @@ export default function Landing() {
 
   return (
     <div style={{ position: "relative", width: "100vw", height: "100vh", background: "#09050a", overflow: "hidden" }}>
+      <style>{`
+        @keyframes spin3d {
+          0%   { transform: rotateY(0deg) rotateX(8deg); }
+          100% { transform: rotateY(360deg) rotateX(8deg); }
+        }
+      `}</style>
       <canvas ref={canvasRef} style={{ position: "absolute", inset: 0 }} />
 
       {/* Left accent */}
@@ -227,17 +233,23 @@ export default function Landing() {
         </div>
       </div>
 
-      {/* Right side panel */}
-      <div style={{ position: "absolute", right: "6vw", top: "50%", transform: "translateY(-50%)", zIndex: 10, display: "flex", flexDirection: "column", gap: "24px", opacity: 0.7 }}>
-        <div style={{ borderLeft: "1px solid rgba(var(--accent-rgb),0.2)", paddingLeft: "20px" }}>
-          <p style={{ fontSize: "8px", letterSpacing: "0.3em", color: "rgba(var(--accent-rgb),0.4)", marginBottom: "12px", textTransform: "uppercase" }}>signal layers</p>
-          {["◈ bias score", "⬡ topology / pca", "Γ gamma exposure", "ν net iv drift", "Ω macro regime", "ψ options flow", "π probability cone", "Δ dealer delta", "ξ iv surface", "τ history log", "σ expected move"].map((line, i) => (
-            <div key={i} style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
-              <div style={{ width: "3px", height: "3px", borderRadius: "50%", background: "rgba(var(--accent-rgb),0.5)" }} />
-              <span style={{ fontSize: "9px", color: "rgba(var(--accent-rgb),0.5)", fontFamily: "JetBrains Mono", letterSpacing: "0.1em" }}>{line}</span>
-            </div>
-          ))}
-        </div>
+      {/* Right side — 3D spinning Greek */}
+      <div style={{
+        position: "absolute", right: "8vw", top: "50%", transform: "translateY(-50%)",
+        zIndex: 10, perspective: "600px",
+      }}>
+        <div style={{
+          fontSize: "clamp(180px, 22vw, 320px)",
+          fontFamily: "JetBrains Mono",
+          fontWeight: 700,
+          color: "transparent",
+          WebkitTextStroke: "1px rgba(var(--accent-rgb),0.25)",
+          textShadow: "0 0 120px rgba(var(--accent-rgb),0.08)",
+          animation: "spin3d 10s linear infinite",
+          display: "inline-block",
+          userSelect: "none",
+          lineHeight: 1,
+        }}>Ω</div>
       </div>
 
       {/* Bottom right */}
