@@ -235,7 +235,7 @@ export default function Landing() {
 
       {/* Right side — 3D spinning Greek */}
       <div style={{
-        position: "absolute", right: "18vw", top: "50%", transform: "translateY(-50%)",
+        position: "absolute", right: "26vw", top: "50%", transform: "translateY(-50%)",
         zIndex: 10, perspective: "600px",
       }}>
         <div style={{
