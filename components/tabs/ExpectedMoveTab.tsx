@@ -131,7 +131,72 @@ export default function ExpectedMoveTab() {
           )}
 
           {d1 && (
-            <div style={{ border: "1px solid var(--border)", background: "rgba(0,0,0,0)", marginBottom: "1px" }}>
+  
+          {/* 3D Expansion Cone */}
+          {d1 && data.moves['1w'] && data.moves['1m'] && (
+            <div style={{ border: '1px solid var(--border)', padding: '28px 32px', background: 'rgba(0,0,0,0)', marginBottom: '1px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <p style={{ fontSize: '9px', color: 'var(--muted)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>volatility expansion cone</p>
+                <div style={{ display: 'flex', gap: '20px' }}>
+                  {[{ label: '1D', color: 'var(--accent)' }, { label: '1W', color: 'var(--warn)' }, { label: '1M', color: '#8888ff' }].map(({ label, color }) => (
+                    <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <div style={{ width: '12px', height: '2px', background: color }} />
+                      <span style={{ fontSize: '8px', color: 'var(--muted)', letterSpacing: '0.1em' }}>{label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div style={{ position: 'relative', height: '160px', perspective: '800px' }}>
+                {/* Center line */}
+                <div style={{ position: 'absolute', left: '10%', right: 0, top: '50%', height: '1px', background: 'rgba(255,255,255,0.08)', transform: 'translateY(-50%)' }} />
+                {/* Spot label */}
+                <div style={{ position: 'absolute', left: '10%', top: '50%', transform: 'translate(-50%, -50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent)', boxShadow: '0 0 12px rgba(var(--accent-rgb),0.6)' }} />
+                  <span style={{ fontSize: '8px', color: 'var(--accent)', fontFamily: 'JetBrains Mono', whiteSpace: 'nowrap' }}>{data.spot.toLocaleString()}</span>
+                </div>
+                {[
+                  { move: data.moves['1m']!, color: '#4444aa', opacity: 0.12, label: '1M', labelColor: '#8888ff' },
+                  { move: data.moves['1w']!, color: '#aa8800', opacity: 0.15, label: '1W', labelColor: 'var(--warn)' },
+                  { move: d1, color: 'rgba(var(--accent-rgb),1)', opacity: 0.2, label: '1D', labelColor: 'var(--accent)' },
+                ].map(({ move, color, opacity, label, labelColor }) => {
+                  const pct = move.move_pct
+                  const heightPct = Math.min(pct * 12, 45)
+                  return (
+                    <div key={label} style={{ position: 'absolute', left: '10%', right: 0, top: '50%', transform: 'translateY(-50%)' }}>
+                      {/* Upper band */}
+                      <div style={{
+                        position: 'absolute', left: 0, right: 0,
+                        height: `${heightPct}%`, bottom: '100%',
+                        background: `linear-gradient(to right, transparent, ${color})`,
+                        opacity, borderTop: `1px solid ${labelColor}`, borderRight: `1px solid ${labelColor}`,
+                        transformOrigin: 'left center',
+                        clipPath: 'polygon(0 100%, 100% 0, 100% 100%)',
+                      }} />
+                      {/* Lower band */}
+                      <div style={{
+                        position: 'absolute', left: 0, right: 0,
+                        height: `${heightPct}%`, top: '100%',
+                        background: `linear-gradient(to right, transparent, ${color})`,
+                        opacity, borderBottom: `1px solid ${labelColor}`, borderRight: `1px solid ${labelColor}`,
+                        clipPath: 'polygon(0 0, 100% 0, 100% 100%)',
+                      }} />
+                      {/* Upper label + price */}
+                      <div style={{ position: 'absolute', right: '2px', bottom: `calc(100% + ${heightPct}% - 4px)`, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                        <span style={{ fontSize: '10px', color: 'var(--bull)', fontFamily: 'JetBrains Mono', fontWeight: 600 }}>{move.upper.toLocaleString()}</span>
+                        <span style={{ fontSize: '7px', color: labelColor, letterSpacing: '0.1em' }}>{label} upper</span>
+                      </div>
+                      {/* Lower label + price */}
+                      <div style={{ position: 'absolute', right: '2px', top: `calc(100% + ${heightPct}% - 4px)`, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                        <span style={{ fontSize: '7px', color: labelColor, letterSpacing: '0.1em' }}>{label} lower</span>
+                        <span style={{ fontSize: '10px', color: 'var(--bear)', fontFamily: 'JetBrains Mono', fontWeight: 600 }}>{move.lower.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+          <div style={{ border: "1px solid var(--border)", background: "rgba(0,0,0,0)", marginBottom: "1px" }}>
               <div style={{ padding: "12px 24px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <p style={{ fontSize: "9px", color: "var(--muted)", letterSpacing: "0.15em", textTransform: "uppercase" }}>dual-method comparison</p>
                 {vixAgree !== null && (
