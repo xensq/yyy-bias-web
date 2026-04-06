@@ -55,8 +55,8 @@ function GreekBackground() {
       y: Math.random() * window.innerHeight,
       symbol: symbols[Math.floor(Math.random() * symbols.length)],
       speed: Math.random() * 0.3 + 0.08,
-      opacity: Math.random() * 0.16 + 0.06,
-      size: Math.random() * 10 + 8,
+      opacity: Math.random() * 0.28 + 0.10,
+      size: Math.random() * 14 + 10,
       drift: (Math.random() - 0.5) * 0.15,
     }))
 
