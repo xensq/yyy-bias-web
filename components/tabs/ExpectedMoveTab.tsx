@@ -212,15 +212,6 @@ export default function ExpectedMoveTab() {
             ))}
           </div>
 
-          <div style={{ border: "1px solid var(--border)", background: "rgba(0,0,0,0)", marginBottom: "1px" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "80px 90px 100px 110px 110px", padding: "8px 24px", borderBottom: "1px solid var(--border)", background: "rgba(30,30,46,0.5)", gap: "16px" }}>
-              {["period","iv","+/-%","upper","lower"].map(h => (<span key={h} style={{ fontSize: "8px", color: "var(--muted)", letterSpacing: "0.15em", textTransform: "uppercase" }}>{h}</span>))}
-            </div>
-            <Row label="1 DAY" move={data.moves["1d"]} />
-            <Row label="1 WEEK" move={data.moves["1w"]} />
-            <Row label="1 MONTH" move={data.moves["1m"]} />
-          </div>
-
           <div style={{ border: "1px solid var(--border)", display: "grid", gridTemplateColumns: "1fr 1fr", background: "rgba(0,0,0,0)" }}>
             <div style={{ padding: "16px 24px", borderRight: "1px solid var(--border)" }}>
               <p style={{ fontSize: "9px", color: "var(--muted)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "10px" }}>how to use this</p>
