@@ -126,6 +126,72 @@ export default function ExpectedMoveTab() {
                 </div>
               ))}
             </div>
+
+          {/* Methodology */}
+          <div style={{ border: "1px solid var(--border)", padding: "20px 24px", background: "rgba(0,0,0,0)" }}>
+            <p style={{ fontSize: "9px", color: "var(--muted)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "12px" }}>how we calculate this</p>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "24px" }}>
+              {[
+                { step: "01", title: "pull live options chain", desc: "we fetch the full SPX/NDX/SPY/QQQ options chain from yfinance — every strike, every expiration, real-time implied volatility and open interest." },
+                { step: "02", title: "isolate ATM IV by expiration", desc: "we filter for near-the-money strikes (within 3% of spot) and group them by DTE bucket: 1-2 days, 3-9 days, 10-35 days. median IV for each bucket." },
+                { step: "03", title: "apply the 1-sigma formula", desc: "expected move = spot × IV × √(days/252). this is the standard options pricing formula for 1 standard deviation move. 68% of outcomes land inside this range." },
+              ].map(({ step, title, desc }) => (
+                <div key={step}>
+                  <p style={{ fontSize: "8px", color: "var(--accent)", fontFamily: "JetBrains Mono", marginBottom: "4px" }}>{step}</p>
+                  <p style={{ fontSize: "9px", color: "var(--text)", fontWeight: 600, marginBottom: "6px", letterSpacing: "0.05em" }}>{title}</p>
+                  <p style={{ fontSize: "8px", color: "var(--muted)", lineHeight: 1.7 }}>{desc}</p>
+                </div>
+              ))}
+            </div>
+            <div style={{ marginTop: "16px", padding: "10px 14px", background: "rgba(220,38,38,0.04)", border: "1px solid rgba(220,38,38,0.15)" }}>
+              <p style={{ fontSize: "8px", color: "var(--muted)", lineHeight: 1.7 }}>
+                <span style={{ color: "var(--accent)" }}>formula: </span>
+                expected move = spot × ATM_IV × √(DTE / 252) · · ·
+                <span style={{ color: "var(--accent)" }}> 1σ = 68% probability </span>· · ·
+                <span style={{ color: "var(--accent)" }}> 2σ = 95% probability </span>· · ·
+                upper = spot + move · lower = spot − move
+              </p>
+            </div>
+          </div>
+
+          {/* Visual bracket */}
+          {data.moves["1d"] && (
+            <div style={{ border: "1px solid var(--border)", padding: "24px", background: "rgba(0,0,0,0)" }}>
+              <p style={{ fontSize: "9px", color: "var(--muted)", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: "20px" }}>1-day range visualization</p>
+              <div style={{ position: "relative", height: "64px", margin: "0 40px" }}>
+                {/* Main line */}
+                <div style={{ position: "absolute", left: 0, right: 0, top: "50%", height: "1px", background: "var(--border)", transform: "translateY(-50%)" }} />
+                {/* Shaded range */}
+                <div style={{ position: "absolute", left: "20%", right: "20%", top: "25%", bottom: "25%", background: "rgba(220,38,38,0.06)", border: "1px solid rgba(220,38,38,0.2)" }} />
+                {/* Upper line */}
+                <div style={{ position: "absolute", left: "80%", top: "15%", bottom: "15%", width: "2px", background: "var(--bull)" }} />
+                <span style={{ position: "absolute", left: "81%", top: "10px", fontSize: "10px", color: "var(--bull)", fontFamily: "JetBrains Mono", fontWeight: 600 }}>{data.moves["1d"]!.upper.toLocaleString()}</span>
+                <span style={{ position: "absolute", left: "81%", bottom: "8px", fontSize: "7px", color: "var(--muted)" }}>+1σ upper</span>
+                {/* Lower line */}
+                <div style={{ position: "absolute", left: "20%", top: "15%", bottom: "15%", width: "2px", background: "var(--bear)" }} />
+                <span style={{ position: "absolute", right: "81%", top: "10px", fontSize: "10px", color: "var(--bear)", fontFamily: "JetBrains Mono", fontWeight: 600, textAlign: "right", transform: "translateX(100%)" }}>{data.moves["1d"]!.lower.toLocaleString()}</span>
+                <span style={{ position: "absolute", right: "81%", bottom: "8px", fontSize: "7px", color: "var(--muted)", transform: "translateX(100%)" }}>−1σ lower</span>
+                {/* Spot */}
+                <div style={{ position: "absolute", left: "50%", top: "10%", bottom: "10%", width: "2px", background: "var(--accent)", transform: "translateX(-50%)" }} />
+                <span style={{ position: "absolute", left: "50%", top: "50%", fontSize: "9px", color: "var(--accent)", fontFamily: "JetBrains Mono", transform: "translate(-50%, -50%)", background: "rgba(9,5,10,0.9)", padding: "2px 6px", whiteSpace: "nowrap" }}>{data.spot.toLocaleString()}</span>
+                {/* Move label */}
+                <span style={{ position: "absolute", left: "50%", bottom: "-20px", fontSize: "8px", color: "var(--muted)", transform: "translateX(-50%)", whiteSpace: "nowrap" }}>±{data.moves["1d"]!.move_pts} pts · ±{data.moves["1d"]!.move_pct}% · 68% probability</span>
+              </div>
+              <div style={{ marginTop: "32px", display: "flex", justifyContent: "center", gap: "32px" }}>
+                {[
+                  { label: "1 week upper", value: data.moves["1w"]?.upper.toLocaleString(), color: "var(--bull)" },
+                  { label: "1 week lower", value: data.moves["1w"]?.lower.toLocaleString(), color: "var(--bear)" },
+                  { label: "1 month upper", value: data.moves["1m"]?.upper.toLocaleString(), color: "var(--bull)" },
+                  { label: "1 month lower", value: data.moves["1m"]?.lower.toLocaleString(), color: "var(--bear)" },
+                ].map(({ label, value, color }) => (
+                  <div key={label} style={{ textAlign: "center" }}>
+                    <p style={{ fontSize: "8px", color: "var(--muted)", marginBottom: "4px" }}>{label}</p>
+                    <p style={{ fontSize: "11px", color, fontFamily: "JetBrains Mono", fontWeight: 600 }}>{value ?? "—"}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           </div>
         </>
       )}
