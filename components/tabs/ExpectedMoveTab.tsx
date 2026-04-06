@@ -61,6 +61,59 @@ export default function ExpectedMoveTab() {
   }
 
   const Cone = ({ d1, d1w, d1m, spot }: { d1: Move; d1w: Move | null; d1m: Move | null; spot: number }) => {
+    const W = 900, H = 220, cx = 120, cy = H / 2
+    const maxMove = Math.max(d1.move_pct, d1w?.move_pct ?? 0, d1m?.move_pct ?? 0)
+    const scale = ((W - cx - 40) / 2) / maxMove
+    const bands = [
+      { move: d1m, color: "#6666ff", label: "1M" },
+      { move: d1w, color: "#e8b84b", label: "1W" },
+      { move: d1,  color: "rgba(220,38,38,1)", label: "1D" },
+    ].filter(b => b.move) as { move: Move; color: string; label: string }[]
+    return (
+      <div style={{ border: "1px solid var(--border)", padding: "24px 28px", background: "rgba(0,0,0,0)", marginBottom: "1px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+          <p style={{ fontSize: "9px", color: "var(--muted)", letterSpacing: "0.15em", textTransform: "uppercase" }}>volatility expansion cone</p>
+          <div style={{ display: "flex", gap: "20px" }}>
+            {[{ l: "1D", c: "rgba(220,38,38,1)" }, { l: "1W", c: "#e8b84b" }, { l: "1M", c: "#6666ff" }].map(({ l, c }) => (
+              <div key={l} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <div style={{ width: "12px", height: "2px", background: c }} />
+                <span style={{ fontSize: "8px", color: "var(--muted)", letterSpacing: "0.1em" }}>{l}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: "auto", overflow: "visible" }}>
+          {/* Center line */}
+          <line x1={cx} y1={cy} x2={W - 20} y2={cy} stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+          {/* Spot dot */}
+          <circle cx={cx} cy={cy} r="5" fill="rgba(220,38,38,1)" />
+          <circle cx={cx} cy={cy} r="10" fill="rgba(220,38,38,0.15)" />
+          <text x={cx} y={cy + 22} textAnchor="middle" fill="rgba(220,38,38,0.8)" fontSize="10" fontFamily="JetBrains Mono">{spot.toLocaleString()}</text>
+          {bands.map(({ move, color, label }) => {
+            const halfH = move.move_pct * scale
+            return (
+              <g key={label}>
+                {/* Filled cone */}
+                <polygon
+                  points={`${cx},${cy} ${W - 40},${cy - halfH} ${W - 40},${cy + halfH}`}
+                  fill={color} fillOpacity="0.06"
+                  stroke={color} strokeOpacity="0.4" strokeWidth="1"
+                />
+                {/* Upper price */}
+                <text x={W - 36} y={cy - halfH - 6} textAnchor="end" fill="rgba(34,197,94,0.9)" fontSize="11" fontFamily="JetBrains Mono" fontWeight="600">{move.upper.toLocaleString()}</text>
+                <text x={W - 36} y={cy - halfH + 10} textAnchor="end" fill={color} fontSize="8" fontFamily="JetBrains Mono" opacity="0.7">{label}</text>
+                {/* Lower price */}
+                <text x={W - 36} y={cy + halfH + 16} textAnchor="end" fill="rgba(255,68,102,0.9)" fontSize="11" fontFamily="JetBrains Mono" fontWeight="600">{move.lower.toLocaleString()}</text>
+                <text x={W - 36} y={cy + halfH} textAnchor="end" fill={color} fontSize="8" fontFamily="JetBrains Mono" opacity="0.7">{label}</text>
+                {/* Tick at end */}
+                <line x1={W - 40} y1={cy - halfH} x2={W - 40} y2={cy + halfH} stroke={color} strokeWidth="1.5" strokeOpacity="0.5" />
+              </g>
+            )
+          })}
+        </svg>
+      </div>
+    )
+  }
     const bands = [
       { move: d1m, color: "#4444cc", labelColor: "#8888ff", label: "1M" },
       { move: d1w, color: "#cc9900", labelColor: "#e8b84b", label: "1W" },
