@@ -1,4 +1,5 @@
 "use client"
+import TerminalLoader from "@/components/TerminalLoader"
 import { useEffect, useState } from "react"
 import dynamic from "next/dynamic"
 // @ts-ignore
@@ -172,12 +173,7 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
         </div>
       )}
 
-      {loading && (
-        <div style={{ background: "var(--surface)", border: "1px solid var(--border)", padding: "32px", display: "flex", alignItems: "center", gap: "8px", color: "var(--muted)", fontSize: "11px" }}>
-          <div style={{ width: "4px", height: "4px", background: "var(--accent)", borderRadius: "50%", animation: "pulse 1.5s infinite" }} />
-          loading history...
-        </div>
-      )}
+      {loading && <TerminalLoader />}
 
       {/* Entropy stats */}
       <div style={{ background: "var(--surface)", border: "1px solid var(--border)", display: "grid", gridTemplateColumns: "1fr 1fr" }}>

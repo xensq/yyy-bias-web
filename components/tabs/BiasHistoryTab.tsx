@@ -1,4 +1,5 @@
 "use client"
+import TerminalLoader from "@/components/TerminalLoader"
 import { useEffect, useState } from "react"
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"

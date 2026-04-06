@@ -1,4 +1,5 @@
 "use client"
+import TerminalLoader from "@/components/TerminalLoader"
 import { useEffect, useState } from "react"
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
@@ -65,12 +66,7 @@ export default function ExpectedMoveTab() {
         </div>
       </div>
 
-      {loading && (
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--muted)", fontSize: "11px", padding: "32px 0" }}>
-          <div style={{ width: "4px", height: "4px", background: "var(--accent)", borderRadius: "50%", animation: "pulse 1.5s infinite" }} />
-          calculating expected moves...
-        </div>
-      )}
+      {loading && <TerminalLoader />}
 
       {error && <div style={{ padding: "16px", border: "1px solid rgba(220,38,38,0.3)", color: "var(--bear)", fontSize: "11px" }}>{error}</div>}
 

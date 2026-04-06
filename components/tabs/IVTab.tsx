@@ -1,4 +1,5 @@
 "use client"
+import TerminalLoader from "@/components/TerminalLoader"
 import { useEffect, useState } from "react"
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
@@ -83,12 +84,7 @@ export default function IVSurfaceTab() {
       </div>
 
       <div style={{ border: "0.5px solid #1a1a1a", borderRadius: "8px", background: "var(--surface)", overflow: "hidden" }}>
-        {loading && (
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "var(--dim)", fontSize: "12px", padding: "80px 0", justifyContent: "center", fontFamily: mono }}>
-            <div style={{ width: "5px", height: "5px", background: "#00c896", borderRadius: "50%" }} />
-            loading {ticker} net iv...
-          </div>
-        )}
+        {loading && <TerminalLoader />}
         {error && <p style={{ color: "#ff5555", fontSize: "12px", padding: "60px 0", textAlign: "center", fontFamily: mono }}>{error}</p>}
 
         {data && !loading && data.status === "building_history" && (

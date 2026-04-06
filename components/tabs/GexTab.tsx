@@ -1,4 +1,5 @@
 "use client"
+import TerminalLoader from "@/components/TerminalLoader"
 import { useMemo, useState, useEffect } from "react"
 import { StrikeData } from "@/lib/api"
 

@@ -1,4 +1,5 @@
 "use client"
+import TerminalLoader from "@/components/TerminalLoader"
 import { useEffect, useState } from "react"
 import dynamic from "next/dynamic"
 // @ts-ignore
@@ -79,12 +80,7 @@ export default function ProbabilityTab() {
         </div>
       </div>
 
-      {loading && (
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "var(--muted)", fontSize: "12px", padding: "32px 0" }}>
-          <div style={{ width: "5px", height: "5px", background: "var(--accent)", borderRadius: "50%", animation: "pulse 1.5s infinite" }} />
-          computing probability distributions...
-        </div>
-      )}
+      {loading && <TerminalLoader />}
       {error && <p style={{ color: "var(--bear)", fontSize: "12px" }}>{error}</p>}
 
       {data && !loading && view === "heatmap" && (

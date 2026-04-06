@@ -1,4 +1,5 @@
 "use client"
+import TerminalLoader from "@/components/TerminalLoader"
 import { useEffect, useState } from "react"
 import { fetchOutlook } from "@/lib/api"
 
@@ -71,12 +72,7 @@ function OutlookSection() {
           </button>
         )}
       </div>
-      {loading && (
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--muted)", fontSize: "11px" }}>
-          <div style={{ width: "4px", height: "4px", background: "var(--accent)", borderRadius: "50%", animation: "pulse 1.5s infinite" }} />
-          analyzing...
-        </div>
-      )}
+      {loading && <TerminalLoader />}
       {error && <p style={{ fontSize: "11px", color: "var(--muted)" }}>could not generate — check openrouter key in railway</p>}
       {text && (
         <div style={{ fontSize: "12px", color: "var(--muted)", lineHeight: 1.8 }}>

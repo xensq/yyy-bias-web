@@ -1,4 +1,5 @@
 "use client"
+import TerminalLoader from "@/components/TerminalLoader"
 import { useEffect, useState } from "react"
 import dynamic from "next/dynamic"
 // @ts-ignore
@@ -140,12 +141,7 @@ export default function IVSurfaceTab() {
         </div>
       </div>
       <div style={{ border: "0.5px solid #1a1a1a", borderRadius: "8px", background: "#0a0a10", overflow: "hidden" }}>
-        {loading && (
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "var(--dim)", fontSize: "12px", padding: "100px 0", justifyContent: "center", fontFamily: "JetBrains Mono, monospace" }}>
-            <div style={{ width: "5px", height: "5px", background: "#00c896", borderRadius: "50%" }} />
-            loading {ticker} options chain...
-          </div>
-        )}
+        {loading && <TerminalLoader />}
         {error && <p style={{ color: "#ff5555", fontSize: "12px", padding: "80px 0", textAlign: "center", fontFamily: "JetBrains Mono, monospace" }}>{error}</p>}
         {surface && !loading && (
           <Plot

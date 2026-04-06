@@ -1,4 +1,5 @@
 "use client"
+import TerminalLoader from "@/components/TerminalLoader"
 import { useEffect, useState } from "react"
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
@@ -56,12 +57,7 @@ export default function NetIVTab() {
         </div>
       </div>
 
-      {loading && (
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "var(--muted)", fontSize: "12px", padding: "32px 0" }}>
-          <div style={{ width: "5px", height: "5px", background: "var(--accent)", borderRadius: "50%", animation: "pulse 1.5s infinite" }} />
-          loading iv history...
-        </div>
-      )}
+      {loading && <TerminalLoader />}
 
       {error && <p style={{ fontSize: "12px", color: "#ff5555", padding: "16px 0" }}>{error}</p>}
 
