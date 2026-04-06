@@ -140,7 +140,7 @@ export default function IVSurfaceTab() {
           ))}
         </div>
       </div>
-      <div style={{ border: "0.5px solid #1a1a1a", borderRadius: "8px", background: "#0a0a10", overflow: "hidden" }}>
+      <div style={{ border: "0.5px solid #1a1a1a", borderRadius: "8px", background: "rgba(0,0,0,0)", overflow: "hidden" }}>
         {loading && <TerminalLoader />}
         {error && <p style={{ color: "#ff5555", fontSize: "12px", padding: "80px 0", textAlign: "center", fontFamily: "JetBrains Mono, monospace" }}>{error}</p>}
         {surface && !loading && (
