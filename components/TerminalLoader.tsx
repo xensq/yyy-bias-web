@@ -148,18 +148,23 @@ export default function TerminalLoader({ tab, label }: { tab?: string; label?: s
   }, [pool])
 
   return (
-    <div style={{ padding: "48px 0", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end", minHeight: "60vh", gap: "16px" }}>
-      <div style={{ position: "relative", width: "48px", height: "48px" }}>
-        <svg
-          viewBox="0 0 100 100"
-          style={{ width: "48px", height: "48px", animation: "spin 3s linear infinite", color: "var(--accent)" }}
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path d="M50 5 L53 47 L95 50 L53 53 L50 95 L47 53 L5 50 L47 47 Z" fill="var(--accent)" opacity="0.9"/>
-          <path d="M50 20 L51.5 48.5 L80 50 L51.5 51.5 L50 80 L48.5 51.5 L20 50 L48.5 48.5 Z" fill="var(--accent)" opacity="0.5"/>
-        </svg>
-      </div>
+    <div style={{ padding: "48px 0", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", gap: "20px" }}>
+      <style>{`
+        @keyframes spin3d { 0% { transform: rotateY(0deg) rotateX(8deg); } 100% { transform: rotateY(360deg) rotateX(8deg); } }
+      `}</style>
+      <div style={{
+        fontSize: "72px",
+        fontFamily: "JetBrains Mono",
+        fontWeight: 700,
+        color: "transparent",
+        WebkitTextStroke: "1px rgba(var(--accent-rgb),0.6)",
+        textShadow: "0 0 40px rgba(var(--accent-rgb),0.2)",
+        animation: "spin3d 6s linear infinite",
+        display: "inline-block",
+        userSelect: "none",
+        lineHeight: 1,
+        perspective: "400px",
+      }}>Ω</div>
       <span style={{
         fontSize: "9px",
         color: "var(--muted)",
@@ -168,6 +173,8 @@ export default function TerminalLoader({ tab, label }: { tab?: string; label?: s
         opacity: fade ? 1 : 0,
         transition: "opacity 0.3s ease",
         minHeight: "14px",
+        maxWidth: "320px",
+        textAlign: "center",
       }}>
         {pool[idx]}
       </span>
