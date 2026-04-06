@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 
 export default function TerminalLoader({ label }: { label?: string }) {
   return (
-    <div style={{ padding: "48px 0", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "16px" }}>
+    <div style={{ padding: "48px 0", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "300px", gap: "16px" }}>
       <div style={{ position: "relative", width: "48px", height: "48px" }}>
         <svg
           viewBox="0 0 100 100"
