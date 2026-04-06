@@ -82,7 +82,7 @@ export default function DealerDeltaTab() {
         </div>
       </div>
 
-      {loading && <TerminalLoader />}
+      {loading && <TerminalLoader tab="delta" />}
 
       {error && <p style={{ color: "var(--bear)", fontSize: "12px" }}>{error}</p>}
 

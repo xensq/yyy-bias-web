@@ -111,7 +111,7 @@ export default function ExpectedMoveTab() {
         </div>
       </div>
 
-      {loading && <TerminalLoader />}
+      {loading && <TerminalLoader tab="expected" />}
       {error && <div style={{ padding: "16px", border: "1px solid rgba(220,38,38,0.3)", color: "var(--bear)", fontSize: "11px" }}>{error}</div>}
 
       {data && !loading && (

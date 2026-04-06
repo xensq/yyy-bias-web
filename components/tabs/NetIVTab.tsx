@@ -57,7 +57,7 @@ export default function NetIVTab() {
         </div>
       </div>
 
-      {loading && <TerminalLoader />}
+      {loading && <TerminalLoader tab="net_iv" />}
 
       {error && <p style={{ fontSize: "12px", color: "#ff5555", padding: "16px 0" }}>{error}</p>}
 

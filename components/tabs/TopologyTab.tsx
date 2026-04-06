@@ -173,7 +173,7 @@ export default function TopologyTab({ topology: t, entropy: e }: TopoProps) {
         </div>
       )}
 
-      {loading && <TerminalLoader />}
+      {loading && <TerminalLoader tab="topology" />}
 
       {/* Entropy stats */}
       <div style={{ background: "var(--surface)", border: "1px solid var(--border)", display: "grid", gridTemplateColumns: "1fr 1fr" }}>

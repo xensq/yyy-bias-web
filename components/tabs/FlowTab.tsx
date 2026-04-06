@@ -70,7 +70,7 @@ export default function FlowTab() {
         </div>
       </div>
 
-      {loading && <TerminalLoader />}
+      {loading && <TerminalLoader tab="flow" />}
       {error && <p style={{ color: "var(--bear)", fontSize: "12px" }}>{error}</p>}
 
       {data && !loading && (

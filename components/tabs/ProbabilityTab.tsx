@@ -80,7 +80,7 @@ export default function ProbabilityTab() {
         </div>
       </div>
 
-      {loading && <TerminalLoader />}
+      {loading && <TerminalLoader tab="probability" />}
       {error && <p style={{ color: "var(--bear)", fontSize: "12px" }}>{error}</p>}
 
       {data && !loading && view === "heatmap" && (

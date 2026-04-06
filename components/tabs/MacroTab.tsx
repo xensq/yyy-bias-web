@@ -72,7 +72,7 @@ function OutlookSection() {
           </button>
         )}
       </div>
-      {loading && <TerminalLoader />}
+      {loading && <TerminalLoader tab="macro" />}
       {error && <p style={{ fontSize: "11px", color: "var(--muted)" }}>could not generate — check openrouter key in railway</p>}
       {text && (
         <div style={{ fontSize: "12px", color: "var(--muted)", lineHeight: 1.8 }}>
