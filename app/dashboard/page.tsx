@@ -195,6 +195,7 @@ export default function Dashboard() {
 
       {/* Main content */}
       <div style={{ marginLeft: `${sideW}px`, flex: 1, minWidth: 0, position: "relative", zIndex: 1, transition: "margin-left 0.2s ease" }}>
+          {loading && <TerminalLoader tab="bias" />}
         <div style={{ maxWidth: "1300px", margin: "0 auto", padding: "32px" }}>
             <div style={{ border: "1px solid rgba(255,68,102,0.3)", background: "rgba(255,68,102,0.04)", padding: "16px", color: "var(--bear)", fontSize: "12px", marginTop: "16px" }}>
               {error}
