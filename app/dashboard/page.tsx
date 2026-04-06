@@ -196,13 +196,6 @@ export default function Dashboard() {
       {/* Main content */}
       <div style={{ marginLeft: `${sideW}px`, flex: 1, minWidth: 0, position: "relative", zIndex: 1, transition: "margin-left 0.2s ease" }}>
         <div style={{ maxWidth: "1300px", margin: "0 auto", padding: "32px" }}>
-          {loading && (
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--muted)", fontSize: "11px", padding: "48px 0" }}>
-              <div style={{ width: "4px", height: "4px", background: "var(--accent)", borderRadius: "50%", animation: "pulse 1.5s infinite" }} />
-              pulling live data...
-            </div>
-          )}
-          {error && (
             <div style={{ border: "1px solid rgba(255,68,102,0.3)", background: "rgba(255,68,102,0.04)", padding: "16px", color: "var(--bear)", fontSize: "12px", marginTop: "16px" }}>
               {error}
             </div>
