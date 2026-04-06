@@ -18,14 +18,14 @@ const TABS = [
   { id: "bias",        label: "Bias",        icon: "◈" },
   { id: "topology",   label: "Topology",    icon: "⬡" },
   { id: "gex",        label: "GEX",         icon: "Γ" },
-  { id: "net iv",     label: "Net IV",      icon: "σ" },
-  { id: "iv surface", label: "IV Surface",  icon: "∿" },
-  { id: "probability",label: "Probability", icon: "∫" },
+  { id: "net iv",     label: "Net IV",      icon: "ν" },
+  { id: "iv surface", label: "IV Surface",  icon: "ξ" },
+  { id: "probability",label: "Probability", icon: "π" },
   { id: "delta",      label: "Delta",       icon: "Δ" },
-  { id: "flow",       label: "Flow",        icon: "θ" },
-  { id: "macro",      label: "Macro",       icon: "Σ" },
-  { id: "history",    label: "History",     icon: "⊞" },
-  { id: "expected",   label: "Exp Move",    icon: "↔" },
+  { id: "flow",       label: "Flow",        icon: "ψ" },
+  { id: "macro",      label: "Macro",       icon: "Ω" },
+  { id: "history",    label: "History",     icon: "τ" },
+  { id: "expected",   label: "Exp Move",    icon: "σ" },
 ] as const
 type TabId = typeof TABS[number]["id"]
 
