@@ -184,7 +184,7 @@ export default function Landing() {
         {/* Stats row */}
         <div style={{ display: "flex", gap: "40px", marginBottom: "48px", opacity: phase >= 2 ? 1 : 0, transition: "opacity 0.6s ease" }}>
           {[
-            { label: "signal layers", value: "6" },
+            { label: "signal layers", value: "11" },
             { label: "data sources", value: "live" },
             { label: "members", value: "invite only" },
           ].map(({ label, value }) => (
@@ -224,6 +224,19 @@ export default function Landing() {
           >
             enter terminal →
           </button>
+        </div>
+      </div>
+
+      {/* Right side panel */}
+      <div style={{ position: "absolute", right: "6vw", top: "50%", transform: "translateY(-50%)", zIndex: 10, display: "flex", flexDirection: "column", gap: "24px", opacity: 0.7 }}>
+        <div style={{ borderLeft: "1px solid rgba(var(--accent-rgb),0.2)", paddingLeft: "20px" }}>
+          <p style={{ fontSize: "8px", letterSpacing: "0.3em", color: "rgba(var(--accent-rgb),0.4)", marginBottom: "12px", textTransform: "uppercase" }}>signal layers</p>
+          {["◈ bias score", "⬡ topology / pca", "Γ gamma exposure", "ν net iv drift", "Ω macro regime", "ψ options flow", "π probability cone", "Δ dealer delta", "ξ iv surface", "τ history log", "σ expected move"].map((line, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
+              <div style={{ width: "3px", height: "3px", borderRadius: "50%", background: "rgba(var(--accent-rgb),0.5)" }} />
+              <span style={{ fontSize: "9px", color: "rgba(var(--accent-rgb),0.5)", fontFamily: "JetBrains Mono", letterSpacing: "0.1em" }}>{line}</span>
+            </div>
+          ))}
         </div>
       </div>
 
