@@ -2,9 +2,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
 :root {
   --accent: #dc2626;
+  --accent-rgb: 220,38,38;
   --accent-dim: rgba(220,38,38,0.06);
   --bg: #09050a;
   --surface: rgba(9,5,10,0.0);
@@ -17,14 +17,12 @@
   --bear: #ff4466;
   --warn: #e8b84b;
 }
-
-[data-theme="crimson"] { --accent: #dc2626; --accent-dim: rgba(220,38,38,0.06); --bull: #22c55e; --bear: #dc2626; }
-[data-theme="gold"]    { --accent: #e8b84b; --accent-dim: rgba(232,184,75,0.06); --bull: #e8b84b; --bear: #ef4444; }
-[data-theme="blue"]    { --accent: #4488ff; --accent-dim: rgba(68,136,255,0.06); --bull: #4488ff; --bear: #ef4444; }
-[data-theme="silver"]  { --accent: #8899bb; --accent-dim: rgba(136,153,187,0.06); --bull: #8899bb; --bear: #f87171; }
-
+[data-theme="default"] { --accent: #dc2626; --accent-rgb: 220,38,38; --accent-dim: rgba(220,38,38,0.06); --bull: #22c55e; --bear: #dc2626; }
+[data-theme="crimson"] { --accent: #dc2626; --accent-rgb: 220,38,38; --accent-dim: rgba(220,38,38,0.06); --bull: #22c55e; --bear: #dc2626; }
+[data-theme="gold"]    { --accent: #e8b84b; --accent-rgb: 232,184,75;  --accent-dim: rgba(232,184,75,0.06);  --bull: #e8b84b; --bear: #ef4444; }
+[data-theme="blue"]    { --accent: #4488ff; --accent-rgb: 68,136,255;  --accent-dim: rgba(68,136,255,0.06);  --bull: #4488ff; --bear: #ef4444; }
+[data-theme="silver"]  { --accent: #8899bb; --accent-rgb: 136,153,187; --accent-dim: rgba(136,153,187,0.06); --bull: #8899bb; --bear: #f87171; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
 body {
   background: #09050a;
   color: var(--text);
@@ -33,43 +31,35 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
-
 ::-webkit-scrollbar { width: 3px; height: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); }
-
 .glass {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 0;
 }
-
 .glass:hover { border-color: var(--border-light); }
-
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
   padding: 16px;
 }
-
 .label {
   font-size: 9px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--muted);
 }
-
 .value {
   font-size: 13px;
   color: var(--text);
   font-weight: 500;
 }
-
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.2; }
 }
-
 @keyframes spin {
   to { transform: rotate(360deg); }
 }

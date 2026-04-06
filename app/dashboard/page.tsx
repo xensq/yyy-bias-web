@@ -61,6 +61,7 @@ function GreekBackground() {
     }))
 
     const draw = () => {
+      const rgb = getComputedStyle(document.documentElement).getPropertyValue("--accent-rgb").trim() || "220,38,38"
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       particles.forEach(p => {
         p.y -= p.speed
@@ -69,7 +70,7 @@ function GreekBackground() {
         if (p.x < -20) p.x = canvas.width + 20
         if (p.x > canvas.width + 20) p.x = -20
         ctx.font = `${p.size}px JetBrains Mono, monospace`
-        ctx.fillStyle = `rgba(220,38,38,${p.opacity})`
+        ctx.fillStyle = `rgba(${rgb},${p.opacity})`
         ctx.fillText(p.symbol, p.x, p.y)
       })
       rafRef.current = requestAnimationFrame(draw)
@@ -86,7 +87,10 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState<TabId>("bias")
-  const [theme, setTheme] = useState("crimson")
+  const [theme, setTheme] = useState(() => {
+    if (typeof window !== "undefined") return localStorage.getItem("yyy-theme") || "crimson"
+    return "crimson"
+  })
   const [collapsed, setCollapsed] = useState(false)
   const router = useRouter()
 
@@ -99,6 +103,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme)
+    localStorage.setItem("yyy-theme", theme)
   }, [theme])
 
   const now = new Date().toLocaleString("en-US", {
@@ -117,7 +122,7 @@ export default function Dashboard() {
       {/* Sidebar */}
       <div style={{
         position: "fixed", left: 0, top: 0, bottom: 0, width: `${sideW}px`,
-        background: "rgba(9,5,10,0.88)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", borderRight: "1px solid rgba(220,38,38,0.12)",
+        background: "rgba(9,5,10,0.88)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", borderRight: "1px solid rgba(var(--accent-rgb),0.12)",
         display: "flex", flexDirection: "column", zIndex: 20,
         transition: "width 0.2s ease",
       }}>
