@@ -239,7 +239,7 @@ export default function Landing() {
         zIndex: 10, perspective: "600px",
       }}>
         <div style={{
-          fontSize: "clamp(180px, 22vw, 320px)",
+          fontSize: "clamp(280px, 35vw, 500px)",
           fontFamily: "JetBrains Mono",
           fontWeight: 700,
           color: "transparent",
