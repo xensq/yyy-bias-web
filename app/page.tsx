@@ -157,7 +157,7 @@ export default function Landing() {
             onChange={e => setKey(e.target.value.toUpperCase())}
             onKeyDown={e => e.key === "Enter" && handleSubmit()}
             placeholder="YYY-XXXXXX"
-            maxLength={10}
+            maxLength={20}
             style={{
               background: "transparent",
               border: "1px solid rgba(var(--accent-rgb),0.3)",
