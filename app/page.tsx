@@ -131,7 +131,7 @@ export default function Landing() {
 
       {/* Spinning Omega */}
       <div style={{ position: "absolute", right: "26vw", top: "50%", transform: "translateY(-50%)", zIndex: 10, perspective: "600px" }}>
-        <div style={{ fontSize: "clamp(280px, 35vw, 500px)", fontFamily: "JetBrains Mono", fontWeight: 700, color: "transparent", WebkitTextStroke: "3px rgba(var(--accent-rgb),1)", textShadow: "0 0 120px rgba(var(--accent-rgb),0.6), 0 0 40px rgba(var(--accent-rgb),0.8)", animation: "spin3d 10s linear infinite", display: "inline-block", userSelect: "none", lineHeight: 1 }}>Ω</div>
+        <div style={{ fontSize: "clamp(280px, 35vw, 500px)", fontFamily: "JetBrains Mono", fontWeight: 700, color: "transparent", WebkitTextStroke: "3px rgba(var(--accent-rgb),1)", textShadow: "0 0 60px rgba(var(--accent-rgb),0.3)", animation: "spin3d 10s linear infinite", display: "inline-block", userSelect: "none", lineHeight: 1 }}>Ω</div>
       </div>
 
       <div style={{ position: "relative", zIndex: 10, height: "100%", display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 10vw" }}>
