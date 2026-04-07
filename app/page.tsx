@@ -118,7 +118,7 @@ export default function Landing() {
       `}</style>
       <canvas ref={canvasRef} style={{ position: "absolute", inset: 0 }} />
       <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: "2px", background: "linear-gradient(to bottom, transparent, rgba(var(--accent-rgb),0.5), transparent)" }} />
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, padding: "20px 40px", display: "flex", justifyContent: "space-between", alignItems: "center", zIndex: 10, borderBottom: "1px solid rgba(var(--accent-rgb),0.08)" }}>
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, padding: "20px 40px", display: "flex", justifyContent: "space-between", alignItems: "center", zIndex: 10, borderBottom: "1px solid rgba(var(--accent-rgb),0.6)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <span style={{ fontSize: "13px", fontWeight: 700, letterSpacing: "0.4em", color: "var(--accent)", fontFamily: "JetBrains Mono" }}>YYY</span>
           <span style={{ fontSize: "8px", letterSpacing: "0.2em", color: "rgba(var(--accent-rgb),0.4)", fontFamily: "JetBrains Mono", textTransform: "uppercase" }}>research</span>
@@ -139,7 +139,7 @@ export default function Landing() {
           <div style={{ width: "32px", height: "1px", background: "rgba(var(--accent-rgb),0.6)" }} />
           <span style={{ fontSize: "9px", letterSpacing: "0.4em", color: "rgba(var(--accent-rgb),0.5)", fontFamily: "JetBrains Mono", textTransform: "uppercase" }}>analysis software</span>
         </div>
-        <h1 style={{ fontSize: "clamp(72px, 13vw, 160px)", fontWeight: 700, color: "#e8e8f0", letterSpacing: "-0.04em", lineHeight: 0.9, marginBottom: "40px", fontFamily: "JetBrains Mono", textShadow: "0 0 80px rgba(var(--accent-rgb),0.08)" }}>yyy</h1>
+        <h1 style={{ fontSize: "clamp(72px, 13vw, 160px)", fontWeight: 700, color: "#e8e8f0", letterSpacing: "-0.04em", lineHeight: 0.9, marginBottom: "40px", fontFamily: "JetBrains Mono", textShadow: "0 0 80px rgba(var(--accent-rgb),0.6)" }}>yyy</h1>
 
         {/* Key input */}
         <div style={{ marginBottom: "12px", minHeight: "20px" }}>
@@ -212,3 +212,5 @@ export default function Landing() {
     </div>
   )
 }
+
+
